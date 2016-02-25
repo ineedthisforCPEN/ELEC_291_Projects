@@ -7,6 +7,10 @@
 #define M1_SPEED_PIN 5
 #define M2_DIR_PIN 7
 #define M2_SPEED_PIN 6
+
+#define FORWARD 0
+#define RIGHT 1
+#define LEFT 2
  
 void setup() { 
   pinMode(M1_DIR_PIN, OUTPUT);   
@@ -15,43 +19,45 @@ void setup() {
  
 void loop() { 
 
-` move_forward();
+  move_forward(MAX_SPEED);
+  //turn_left(2000);
+  //turn_left(1000);
   delay(1000);
   stop_motors();
   delay(1000);
   /*
+  stop_motors();
+  delay(3000);
+  turn_right(3000);
+  delay(1000);
+  turn_left(3000);
+  */
+  /*
   int value;
   for(value = 0 ; value <= 255; value+=5) 
   { 
-    digitalWrite(M1, HIGH);   
+    digitalWrite(M2_DIR_PIN, LOW);   
     //digitalWrite(M2, HIGH);       
-    analogWrite(E1, value);   //PWM Speed Control
+    analogWrite(M2_SPEED_PIN, value);   //PWM Speed Control
     //analogWrite(E2, value);   //PWM Speed Control
     delay(30);
-    */ 
-    
+  } 
+    */
 }
 
-// Move robot forward at max speed
+// Move robot forward at a given speed ranging from MIN_SPEED to MAX_SPEED
 
-void move_forward() {
-  digitalWrite(M1_DIR_PIN, HIGH);
-  digitalWrite(M2_DIR_PIN, HIGH);
-  analogWrite(M1_SPEED_PIN, MAX_SPEED);
-  analogWrite(M2_SPEED_PIN, MAX_SPEED);
+void move_forward(int speed) {
+  set_motors(FORWARD);
+  analogWrite(M1_SPEED_PIN, speed);
+  analogWrite(M2_SPEED_PIN, speed);
 }
 
 // Turn robot right 90 degrees from forward direction
 // time (ms) specifies the duration of turning (adjust for 90 degree turn)
 
 void turn_right(int time) {
-  // Need to figure out how to turn 90 degrees... spin motors for a specific duration?
-  // probably necessary to experiment, since we can't provide feedback to the robot when it has
-  // turned 90 degrees
-
-  digitalWrite(M1_DIR_PIN, HIGH);
-  digitalWrite(M2_DIR_PIN, LOW);
-
+  set_motors(RIGHT);
   analogWrite(M1_SPEED_PIN, MAX_SPEED);
   analogWrite(M2_SPEED_PIN, MAX_SPEED);
   delay(time);
@@ -63,10 +69,7 @@ void turn_right(int time) {
 // time (ms) specifies the duration of turning (adjust for 90 degree turn)
 
 void turn_left(int time) {
-
-  digitalWrite(M1_DIR_PIN, HIGH);
-  digitalWrite(M2_DIR_PIN, LOW);
-
+  set_motors(LEFT);
   analogWrite(M1_SPEED_PIN, MAX_SPEED);
   analogWrite(M2_SPEED_PIN, MAX_SPEED);
   delay(time);
@@ -90,6 +93,23 @@ void slow_down(int time) {
 void stop_motors() {
   analogWrite(M1_SPEED_PIN, MIN_SPEED);
   analogWrite(M2_SPEED_PIN, MIN_SPEED);
+}
+
+// Set the motors for a desired direction for the robot
+
+void set_motors(int direction) {
+  if (direction == FORWARD) {
+    digitalWrite(M1_DIR_PIN, LOW);
+    digitalWrite(M2_DIR_PIN, LOW);
+  }
+  else if (direction == RIGHT) {
+    digitalWrite(M1_DIR_PIN, HIGH );
+    digitalWrite(M2_DIR_PIN, LOW);
+  }
+  else {      // direction == LEFT
+    digitalWrite(M1_DIR_PIN, LOW);
+    digitalWrite(M2_DIR_PIN, HIGH);
+  }
 }
 
 
