@@ -21,9 +21,9 @@ void loop() {
 
   move_forward(MAX_SPEED);
   //turn_left(2000);
-  //turn_left(1000);
+  //turn_left(150);
   delay(1000);
-  stop_motors();
+  slow_down(5000);
   delay(1000);
   /*
   stop_motors();
@@ -42,7 +42,7 @@ void loop() {
     //analogWrite(E2, value);   //PWM Speed Control
     delay(30);
   } 
-    */
+   */
 }
 
 // Move robot forward at a given speed ranging from MIN_SPEED to MAX_SPEED
@@ -103,12 +103,12 @@ void set_motors(int direction) {
     digitalWrite(M2_DIR_PIN, LOW);
   }
   else if (direction == RIGHT) {
-    digitalWrite(M1_DIR_PIN, HIGH );
-    digitalWrite(M2_DIR_PIN, LOW);
+    digitalWrite(M1_DIR_PIN, LOW );
+    digitalWrite(M2_DIR_PIN, HIGH);
   }
   else {      // direction == LEFT
-    digitalWrite(M1_DIR_PIN, LOW);
-    digitalWrite(M2_DIR_PIN, HIGH);
+    digitalWrite(M1_DIR_PIN, HIGH);
+    digitalWrite(M2_DIR_PIN, LOW);
   }
 }
 
