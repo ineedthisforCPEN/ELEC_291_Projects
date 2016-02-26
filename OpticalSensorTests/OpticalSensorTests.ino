@@ -1,12 +1,19 @@
 void setup() {
   // put your setup code here, to run once:
   pinMode(A0, INPUT);
+  //pinMode(10, INPUT);
   Serial.begin(9600);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  Serial.println(analogRead(A0));
+  // put your main code here, to run repeatedly
+  int analog = analogRead(A0);
+  //int digital = digitalRead(10);
+  
+  Serial.print(analog);
+  Serial.print("\t\t");
+  //Serial.print(digital);
+  Serial.println();
   delay(100);
 }
 
