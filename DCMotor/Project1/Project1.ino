@@ -1,10 +1,3 @@
-//Test Case 1:
-//Move forward at MAX_SPEED for one second, then stopping for one second.
-move_forward(MAX_SPEED);
-delay(1000);
-stop_motors();
-delay(1000);
-
 #define MAX_SPEED 255
 #define MIN_SPEED 0 // not moving
 #define SPEED_DEC 5 // decrement value for speed
@@ -34,20 +27,31 @@ void setup() {
 }
 
 void loop() {
+  /*
+   //Test Case 1:
+  //Move forward at MAX_SPEED for one second, then stopping for one second.
+  move_forward(MAX_SPEED);
+  delay(1000);
+  stop_motors();
+  delay(1000);
   //Test Case 2:
   //Turn left at MAX_SPEED for one second, then stopping for one second.
   turn_left(1000);
   delay(1000);
   stop_motors();
   delay(1000);
-
+*/
   //Test Case 3:
   //Turn right at MAX_SPEED for one second, then stopping for one second.
-  turn_right(1000);
+  for (int i = 0; i < 1000; i++) {
+    turn_right();
+  }
+  //turn_right(1000);
   delay(1000);
-  stop_motors();
-  delay(1000);
+  //stop_motors();
+  //delay(1000);
 
+/*
   //Test Case 4:
   //Only run one of the motors
   int value;
@@ -69,12 +73,15 @@ void loop() {
   //turn_left(2000);
   //turn_left(150);
 
+  
   dist = distanceFromSensor();
   Serial.println(dist);
   if (dist < 50.00) {
     slow_down(2000);
     delay(1000);
   }
+  */
+  
 }
 
 void move_forward(int speed) {
@@ -83,26 +90,24 @@ void move_forward(int speed) {
   analogWrite(M2_SPEED_PIN, speed);
 }
 
-// Turn robot right 90 degrees from forward direction
-// time (ms) specifies the duration of turning (adjust for 90 degree turn)
+// Turn robot right from forward direction for 1 ms
 
-void turn_right(int time) {
+void turn_right() {
   set_motors(RIGHT);
   analogWrite(M1_SPEED_PIN, MAX_SPEED);
   analogWrite(M2_SPEED_PIN, MAX_SPEED);
-  delay(time);
+  delay(1);
   // once turning is finished, stop motors
   stop_motors();
 }
 
-// Turn robot left 90 degrees from forward direction
-// time (ms) specifies the duration of turning (adjust for 90 degree turn)
+// Turn robot left from forward direction for 1 ms
 
-void turn_left(int time) {
+void turn_left() {
   set_motors(LEFT);
   analogWrite(M1_SPEED_PIN, MAX_SPEED);
   analogWrite(M2_SPEED_PIN, MAX_SPEED);
-  delay(time);
+  delay(1);
   // once turning is finished, stop motors
   stop_motors();
 }
@@ -129,16 +134,16 @@ void stop_motors() {
 
 void set_motors(int direction) {
   if (direction == FORWARD) {
-    digitalWrite(M1_DIR_PIN, LOW);
-    digitalWrite(M2_DIR_PIN, LOW);
-  }
-  else if (direction == RIGHT) {
-    digitalWrite(M1_DIR_PIN, LOW );
+    digitalWrite(M1_DIR_PIN, HIGH);
     digitalWrite(M2_DIR_PIN, HIGH);
   }
-  else {      // direction == LEFT
-    digitalWrite(M1_DIR_PIN, HIGH);
+  else if (direction == RIGHT) {
+    digitalWrite(M1_DIR_PIN, HIGH );
     digitalWrite(M2_DIR_PIN, LOW);
+  }
+  else {      // direction == LEFT
+    digitalWrite(M1_DIR_PIN, LOW);
+    digitalWrite(M2_DIR_PIN, HIGH);
   }
 }
 
