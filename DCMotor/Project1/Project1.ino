@@ -1,3 +1,10 @@
+//Test Case 1:
+//Move forward at MAX_SPEED for one second, then stopping for one second.
+move_forward(MAX_SPEED);
+delay(1000);
+stop_motors();
+delay(1000);
+
 #define MAX_SPEED 255
 #define MIN_SPEED 0 // not moving
 #define SPEED_DEC 5 // decrement value for speed
@@ -15,51 +22,60 @@
 #define ECHO 13
 #define TRIGGER 12
 #define TEMPERATURE A0
- 
-void setup() { 
+
+void setup() {
   Serial.begin(9600);
-  pinMode(M1_DIR_PIN, OUTPUT);   
-  pinMode(M2_DIR_PIN, OUTPUT); 
+  pinMode(M1_DIR_PIN, OUTPUT);
+  pinMode(M2_DIR_PIN, OUTPUT);
 
   pinMode(ECHO, INPUT);
   pinMode(TRIGGER, OUTPUT);
   pinMode(TEMPERATURE, INPUT);
-} 
- 
-void loop() { 
+}
+
+void loop() {
+  //Test Case 2:
+  //Turn left at MAX_SPEED for one second, then stopping for one second.
+  turn_left(1000);
+  delay(1000);
+  stop_motors();
+  delay(1000);
+
+  //Test Case 3:
+  //Turn right at MAX_SPEED for one second, then stopping for one second.
+  turn_right(1000);
+  delay(1000);
+  stop_motors();
+  delay(1000);
+
+  //Test Case 4:
+  //Only run one of the motors
+  int value;
+  for (value = 0 ; value <= 255; value += 5)
+  {
+    digitalWrite(M2_DIR_PIN, LOW);
+    //digitalWrite(M2, HIGH);
+    analogWrite(M2_SPEED_PIN, value);   //PWM Speed Control
+    //analogWrite(E2, value);   //PWM Speed Control
+    delay(30);
+  }
+
+  //Test Case 5:
+  //Move forward for maximum speed, when an object is detected to be within our threshold of 50cm, slow down the robot
+  //Robot should come to a stop in 2 seconds
   float dist;
 
   move_forward(MAX_SPEED);
   //turn_left(2000);
   //turn_left(150);
-  
+
   dist = distanceFromSensor();
   Serial.println(dist);
   if (dist < 50.00) {
     slow_down(2000);
     delay(1000);
   }
-  /*
-  stop_motors();
-  delay(3000);
-  turn_right(3000);
-  delay(1000);
-  turn_left(3000);
-  */
-  /*
-  int value;
-  for(value = 0 ; value <= 255; value+=5) 
-  { 
-    digitalWrite(M2_DIR_PIN, LOW);   
-    //digitalWrite(M2, HIGH);       
-    analogWrite(M2_SPEED_PIN, value);   //PWM Speed Control
-    //analogWrite(E2, value);   //PWM Speed Control
-    delay(30);
-  } 
-   */
 }
-
-// Move robot forward at a given speed ranging from MIN_SPEED to MAX_SPEED
 
 void move_forward(int speed) {
   set_motors(FORWARD);
@@ -129,13 +145,13 @@ void set_motors(int direction) {
 //------------------------------------------------------------------------------------------------------
 
 /**
- * This function is meant to calculate the sound's period based on the reading from the
- * LM35 temperature sensor and lecture slides. It reads the temperature sensor value, then
- * returns the calculated period.
- * 
- * This function takes into account that the sound wave must travel twice the distance
- * (hence, 20000.0 is used instead of 10000.0)
- */
+   This function is meant to calculate the sound's period based on the reading from the
+   LM35 temperature sensor and lecture slides. It reads the temperature sensor value, then
+   returns the calculated period.
+
+   This function takes into account that the sound wave must travel twice the distance
+   (hence, 20000.0 is used instead of 10000.0)
+*/
 float calculatePeriod(void) {
   long startTime = millis();                              // Get current uptime of Arduino board
   long totalMilliVolts = 0;                               // Long for storing total millivolts (long to prevent overflow)
@@ -151,16 +167,16 @@ float calculatePeriod(void) {
   // The value 0.415282392 is used instead of 500.0/1024.0 - we believe this will reduce the number of computations needed
   // Calculation is (1000000 / 100) * (1 / (331.5 + 0.6 * Temperature))
   // Our reduced calculation is seen below
-  return 20000.0 / (331.5 + 0.6*(((float) totalMilliVolts)/((float) numMeasures) * (0.415282392)));
-                                /*--------------------- Temperature in C -----------------------*/
+  return 20000.0 / (331.5 + 0.6 * (((float) totalMilliVolts) / ((float) numMeasures) * (0.415282392)));
+  /*--------------------- Temperature in C -----------------------*/
 }
 
 /**
- * This function determines how far away an object is from the sensor. The calculations
- * are based on the formula given in the lecture slides
- * 
- * Distance in cm = Echo pulse width (in us) / period
- */
+   This function determines how far away an object is from the sensor. The calculations
+   are based on the formula given in the lecture slides
+
+   Distance in cm = Echo pulse width (in us) / period
+*/
 float distanceFromSensor(void) {
   // Send a start signal to the trigger pin
   digitalWrite(TRIGGER, HIGH);
@@ -176,4 +192,3 @@ float distanceFromSensor(void) {
   // Return the distance (in centimeters)
   return ((float) echoTime / period);
 }
-
