@@ -22,15 +22,28 @@ delay(1000);
 #define ECHO 13
 #define TRIGGER 12
 #define TEMPERATURE A0
+#define SENSOR_F A1
+#define SENSOR_L A2
+#define SENSOR_R A3
+
+int sensorf_value, sensorl_value, sensorr_value = 0;
+
+#define BLACK_THRESHOLD 100
 
 void setup() {
   Serial.begin(9600);
+  
   pinMode(M1_DIR_PIN, OUTPUT);
   pinMode(M2_DIR_PIN, OUTPUT);
 
   pinMode(ECHO, INPUT);
   pinMode(TRIGGER, OUTPUT);
   pinMode(TEMPERATURE, INPUT);
+
+  pinMode(SENSOR_F, INPUT);
+  pinMode(SENSOR_L, INPUT);
+  pinMode(SENSOR_R, INPUT);
+
 }
 
 void loop() {
@@ -192,3 +205,41 @@ float distanceFromSensor(void) {
   // Return the distance (in centimeters)
   return ((float) echoTime / period);
 }
+
+/**
+   This function allows for the robot to follow a guided path using the reflective optical sensors. The sensors are attached at the front of the robot in a triangle formation.
+   Algorithm:
+             -when front sensor detects black tape, will move forward at _ speed
+             -when front sensor is off the black tape, the robot will read the left and right sensors. The robot will turn in the direction of whatever sensor that detects the line, and
+              will not stop turning until the front sensor detects the black line. When the line is detected, the robot continues to travel straight. 
+             -when no sensors detect the line, the robot will travel forward for 0.5s before it reads the left and right sensors again. 
+             -when both sensors detect line, the robot will choose a random direction to spin.         
+*/
+
+void followLine() {
+ 
+ while(true) { 
+    sensorf_value = analogRead(SENSOR_F);
+    if(sensor_value > threshold)
+    {
+        move_forward(MAX_SPEED);
+    }
+
+    else
+    {
+        spinRobot();
+    }
+
+    delay(500);
+ }
+}
+
+void spinBot() {
+  sensorl_value = analogRead(SENSOR_L);
+  sensorr_value = analogRead(SENSOR_R);
+
+  
+
+}
+}
+
