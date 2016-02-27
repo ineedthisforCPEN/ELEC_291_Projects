@@ -15,9 +15,12 @@
 #define ECHO 13
 #define TRIGGER 12
 #define TEMPERATURE A0
+
 #define SENSOR_F A1
 #define SENSOR_L A2
 #define SENSOR_R A3
+
+bool leave = false;
 
 int sensorf_value, sensorl_value, sensorr_value = 0;
 
@@ -57,7 +60,7 @@ void loop() {
   //Test Case 3:
   //Turn right at MAX_SPEED for one second, then stopping for one second.
   for (int i = 0; i < 1000; i++) {
-    turn_right();
+    turn_wheel(RIGHT);
   }
   //turn_right(1000);
   delay(1000);
@@ -103,21 +106,10 @@ void move_forward(int speed) {
   analogWrite(M2_SPEED_PIN, speed);
 }
 
-// Turn robot right from forward direction for 1 ms
+// Turn robot from forward direction towards input direction for 1 ms
 
-void turn_right() {
-  set_motors(RIGHT);
-  analogWrite(M1_SPEED_PIN, MAX_SPEED);
-  analogWrite(M2_SPEED_PIN, MAX_SPEED);
-  delay(1);
-  // once turning is finished, stop motors
-  stop_motors();
-}
-
-// Turn robot left from forward direction for 1 ms
-
-void turn_left() {
-  set_motors(LEFT);
+void turn_wheel(int direction) {
+  set_motors(direction);
   analogWrite(M1_SPEED_PIN, MAX_SPEED);
   analogWrite(M2_SPEED_PIN, MAX_SPEED);
   delay(1);
@@ -212,7 +204,7 @@ float distanceFromSensor(void) {
 }
 
 /**
-   This function allows for the robot to follow a guided path using the reflective optical sensors. The sensors are attached at the front of the robot in a triangle formation.
+   The function followLine() allows for the robot to follow a guided path using the reflective optical sensors. The sensors are attached at the front of the robot in a triangle formation.
    Algorithm:
              -when front sensor detects black tape, will move forward at _ speed
              -when front sensor is off the black tape, the robot will read the left and right sensors. The robot will turn in the direction of whatever sensor that detects the line, and
@@ -222,29 +214,65 @@ float distanceFromSensor(void) {
 */
 
 void followLine() {
- 
+ //unless prompted to leave, the function runs on an infinite loop
  while(true) { 
-    sensorf_value = analogRead(SENSOR_F);
-    if(sensor_value > threshold)
+    if(leave == true)
+      break;
+     
+    sensorf_value = analogRead(SENSOR_F); //read the front sensor
+    
+    //if the front sensor detects the path, continue moving forward
+    if(sensorf_value <= BLACK_THRESHOLD)
     {
         move_forward(MAX_SPEED);
+        delay(500);
     }
 
     else
     {
-        spinRobot();
-    }
+        sensorl_value = analogRead(SENSOR_L); //read the left sensor
+        sensorr_value = analogRead(SENSOR_R); //read the right sensor
 
-    delay(500);
+        //if the left sensor detects the path AND the right sensor does not, turn the robot to the left until the front sensor detects the path again,
+        //and then continue moving forward
+        if(sensorl_value <= BLACK_THRESHOLD && sensorr_value > BLACK_THRESHOLD)
+        {
+              turnRobot(LEFT);
+        }
+
+        //if the right sensor detects the path AND the left sensor does not, turn the robot to the right until the front sensor detects the path again,
+        //and then continue moving forward
+        else if(sensorl_value > BLACK_THRESHOLD && sensorr_value <= BLACK_THRESHOLD)
+        {
+              turnRobot(RIGHT);
+        }
+
+        //if neither sensor detects the path, move the robot forward a tiny bit and try again
+        else if(sensorl_value <= BLACK_THRESHOLD && sensorr_value <= BLACK_THRESHOLD)
+        {
+              move_forward(MAX_SPEED/2);
+              delay(20);
+        }
+
+        //if both sensors detect the path, turn the robot left until the front sensor detects the path
+        else
+        {
+              turnRobot(LEFT);
+        }
+    }
  }
 }
 
-void spinBot() {
-  sensorl_value = analogRead(SENSOR_L);
-  sensorr_value = analogRead(SENSOR_R);
-
-  
+//Function that turns the robot in a certain direction for 90 degrees. Stops if the front sensor detects the path
+void turnRobot(int direction) {
+  for(int i = 0; i <= 150; i++)
+  {
+    turn_wheel(direction);
+    if(analogRead(SENSOR_F) > BLACK_THRESHOLD)
+    {
+      break;
+    }
+    
+  }
 
 }
-}
-
