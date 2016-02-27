@@ -38,15 +38,15 @@ void adjustCourse(int currentSpeedVoltage) {
     left_measure = analogRead(LEFT_WHEEL);
     right_measure = analogRead(RIGHT_WHEEL);
 
-    if (start_left   == NULL && left_measure  < THRESHOLD) start_left   = millis();
-    if (start_right  == NULL && right_measure < THRESHOLD) start_right  = millis();
+    if (start_left   == NULL && left_measure  < HALL_THRESHOLD) start_left   = millis();
+    if (start_right  == NULL && right_measure < HALL_THRESHOLD) start_right  = millis();
     
     // NOTE: 200 is used below because the fastest possible period is 450 milliseconds (200 is less than 450),
     // yet the wheel can spin enough in 200 milliseconds to pass the hall effect sensor wihtout being read
     // twice before completing a full revolution
-    if (period_left  != NULL && left_measure  < THRESHOLD && millis() - start_left  > 200)
+    if (period_left  != NULL && left_measure  < HALL_THRESHOLD && millis() - start_left  > 200)
       period_left  = millis() - start_left;
-    if (period_right != NULL && right_measure < THRESHOLD && millis() - start_right > 200)
+    if (period_right != NULL && right_measure < HALL_THRESHOLD && millis() - start_right > 200)
       period_right = millis() - start_right;
 
     // If both periods have been measured, leave this while loop
