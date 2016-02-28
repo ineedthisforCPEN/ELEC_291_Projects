@@ -1,16 +1,26 @@
 #include <Servo.h>
 
-#define ECHO 9          // Arduino pin to which the ultrasonic sensor's echo pin is connected
-#define TRIGGER 10      // Arduino pin to which the ultrasonic sensor's trigger pin is connected
+#define M1_DIR_PIN 4
+#define M1_SPEED_PIN 5
+#define M2_DIR_PIN 7
+#define M2_SPEED_PIN 6
+#define ECHO 10         // Arduino pin to which the ultrasonic sensor's echo pin is connected
+#define TRIGGER 11      // Arduino pin to which the ultrasonic sensor's trigger pin is connected
 #define TEMPERATURE A0  // Arduino pin to which the LM35 output is connected
-#define SERVO 11        // Arduino pin to which the servo output is connected
+#define SERVO 12        // Arduino pin to which the servo output is connected
 
-#define LEFT 0
-#define RIGHT 1
-#define BACKWARDS 2
-#define STOP_THRESHOLD 50.00
+#define FORWARD 0
+#define LEFT 1
+#define RIGHT 2
+#define BACKWARDS 3
+
+#define MAX_SPEED 255
+#define MIN_SPEED 0 // not moving
+#define SPEED_DEC 5 // decrement value for speed
+
+#define STOP_THRESHOLD 40.00
 #define SCAN_THRESHOLD 10.00
-#define SLOW_DOWN_TIME 2000
+#define SLOW_DOWN_TIME 1000
 
 /* Function prototupes */
 int scanEnvironment(void);
@@ -20,12 +30,17 @@ float distanceFromSensor(void);
 /* Global variables */
 Servo scanningServo;
 int currentServoDegrees = 90;   // Servo is initially facing forwards
+int current_speed = 0;
 
 void setup() {
   // Initialize serial port - useful for debugging
   Serial.begin(9600);
 
   // Initialize pins and servo motor
+  pinMode(M1_DIR_PIN, OUTPUT);
+  pinMode(M1_SPEED_PIN, OUTPUT);
+  pinMode(M2_DIR_PIN, OUTPUT);
+  pinMode(M2_SPEED_PIN, OUTPUT);
   pinMode(ECHO, INPUT);
   pinMode(TRIGGER, OUTPUT);
   pinMode(TEMPERATURE, INPUT);
@@ -34,13 +49,16 @@ void setup() {
 
 void loop() {
   int obstacleDistance;
+  int i;
 
+  move_forward(MAX_SPEED);
+/*
   obstacleDistance = distanceFromSensor();
   if (obstacleDistance <= STOP_THRESHOLD) {
     int turnDirection;
     
     // Slow down if an object is detected and come to a stop
-    //slow_down(SLOW_DOWN_TIME);
+    slow_down(SLOW_DOWN_TIME);
     Serial.println("STOPPED");
     delay(500);
     
@@ -48,11 +66,15 @@ void loop() {
     turnDirection = scanEnvironment();
     switch(turnDirection) {
       case LEFT:
-        //turnLeftFunction();
+        for (i = 0; i < 300; i++) {
+          turn_robot(LEFT);
+        }
         Serial.println("TURNING LEFT");
         break;
       case RIGHT:
-        //turnRightFunction();
+        for (i = 0; i < 300; i++) {
+          turn_robot(RIGHT);
+        }
         Serial.println("TURNING RIGHT");
         break;
       case BACKWARDS:
@@ -62,7 +84,7 @@ void loop() {
         Serial.println("GOING BACKWARDS");
         break;
     }
-  }
+  }*/
 }
 
 //------------------------------------------------
@@ -119,7 +141,7 @@ int scanEnvironment(void) {
   if (leftDistance < SCAN_THRESHOLD && rightDistance < SCAN_THRESHOLD) {
     // If stuck, move backwards
     return BACKWARDS;
-  } else if (leftDistance >= rightDistance) {
+  } else if (leftDistance > rightDistance) {
     // Turn left if there's more space on the left
     return LEFT;
   } else {
@@ -182,4 +204,66 @@ float distanceFromSensor(void) {
 
   // Return the distance (in centimeters)
   return ((float) echoTime / period);
+}
+
+//------------------------------------------------
+// FUNCTIONS FOR ADJUSTING THE MOTORS
+//------------------------------------------------
+
+void move_forward(int speed) {
+  set_motors(FORWARD);
+  current_speed = speed;
+  analogWrite(M1_SPEED_PIN, speed);
+  analogWrite(M2_SPEED_PIN, speed);
+}
+
+// Turn robot from forward direction towards input direction for 1 ms
+
+void turn_robot(int direction) {
+  set_motors(direction);
+  analogWrite(M1_SPEED_PIN, MAX_SPEED);
+  analogWrite(M2_SPEED_PIN, MAX_SPEED);
+  delay(1);
+  // once turning is finished, stop motors
+  stop_motors();
+}
+
+// Slow down robot from MAX_SPEED to MIN_SPEED
+// time (ms) specifies duration over which robot slows down
+
+void slow_down(int time) {
+  for (int speed = MAX_SPEED; speed > MIN_SPEED; speed -= SPEED_DEC) {
+    current_speed = speed;
+    analogWrite(M1_SPEED_PIN, speed);
+    analogWrite(M2_SPEED_PIN, speed);
+    delay(time / (MAX_SPEED / SPEED_DEC));
+  }
+}
+
+// Stops the motors from turning
+
+void stop_motors() {
+  analogWrite(M1_SPEED_PIN, MIN_SPEED);
+  analogWrite(M2_SPEED_PIN, MIN_SPEED);
+}
+
+// Set the motors for a desired direction for the robot
+
+void set_motors(int direction) {
+  if (direction == FORWARD) {
+    digitalWrite(M1_DIR_PIN, HIGH);
+    digitalWrite(M2_DIR_PIN, HIGH);
+  }
+  else if (direction == BACKWARDS) {
+    digitalWrite(M1_DIR_PIN, LOW);
+    digitalWrite(M2_DIR_PIN, LOW);
+  }
+  else if (direction == RIGHT) {
+    digitalWrite(M1_DIR_PIN, HIGH );
+    digitalWrite(M2_DIR_PIN, LOW);
+  }
+  else {      // direction == LEFT
+    digitalWrite(M1_DIR_PIN, LOW);
+    digitalWrite(M2_DIR_PIN, HIGH);
+  }
 }
