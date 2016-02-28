@@ -221,7 +221,7 @@ float distanceFromSensor(void) {
 void followLine() {
  //unless prompted to leave, the function runs on an infinite loop
  while(true) { 
-    if(leave == true)
+    if(leave)
       break;
      
     sensorf_value = analogRead(SENSOR_F); //read the front sensor
