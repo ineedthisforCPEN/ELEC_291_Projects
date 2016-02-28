@@ -1,6 +1,7 @@
+// Speed constants
 #define MAX_SPEED 255
 #define MIN_SPEED 0 // not moving
-#define SPEED_DEC 5 // decrement value for speed
+#define SPEED_DEC 5 // decrement value for speed (when slowing down)
 
 // Arduino digital pins for controlling DC motors
 #define M1_DIR_PIN 4
@@ -8,9 +9,11 @@
 #define M2_DIR_PIN 7
 #define M2_SPEED_PIN 6
 
-#define PCP_FUNC1_PIN 1
-#define PCP_FUNC2_PIN 2
+// Arduino digital pins corresponding to the two principle functionalities
+#define PRNCP_FUNC1_PIN 1
+#define PRNCP_FUNC2_PIN 2
 
+// Robot directions
 #define FORWARD 0
 #define RIGHT 1
 #define LEFT 2
@@ -22,20 +25,17 @@
 #define SENSOR_F A1
 #define SENSOR_L A2
 #define SENSOR_R A3
-
 #define BLACK_THRESHOLD 100
 
 bool leave = false;
-
 int sensorf_value, sensorl_value, sensorr_value = 0;
-
 int current_speed = 0;
 
 void setup() {
   Serial.begin(9600);
 
-  pinMode(PCP_FUNC1_PIN, INPUT);
-  pinMode(PCP_FUNC2_PIN, INPUT);
+  pinMode(PRNCP_FUNC1_PIN, INPUT);
+  pinMode(PRNCP_FUNC2_PIN, INPUT);
   pinMode(M1_DIR_PIN, OUTPUT);
   pinMode(M2_DIR_PIN, OUTPUT);
 
@@ -87,7 +87,6 @@ void loop() {
   //Move forward for maximum speed, when an object is detected to be within our threshold of 50cm, slow down the robot
   //Robot should come to a stop in 2 seconds
   
-
   move_forward(MAX_SPEED);
   //turn_left(2000);
   //turn_left(150);
@@ -99,9 +98,23 @@ void loop() {
     slow_down(2000);
     delay(1000);
   }
-  
+}
+
+// Executes the first principle function
+
+void prncp_func1() {
   
 }
+
+// Executes the second principle function
+
+void prncp_func2() {
+  
+}
+
+//------------------------------------------------------------------------------------------------------
+
+// Move robot forward at a given speed
 
 void move_forward(int speed) {
   set_motors(FORWARD);
@@ -281,3 +294,5 @@ void turn_to_check_path(int direction) {
   }
 
 }
+
+
