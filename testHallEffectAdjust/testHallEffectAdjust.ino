@@ -1,5 +1,5 @@
-#define LEFT_WHEEL  A1          // The Arduino pin to which the left wheel hall effect sensor is attached
-#define RIGHT_WHEEL A0          // The Arduino pin to which the right wheel hall effect sensor is attached
+#define LEFT_WHEEL  A0          // The Arduino pin to which the left wheel hall effect sensor is attached
+#define RIGHT_WHEEL A1          // The Arduino pin to which the right wheel hall effect sensor is attached
 #define HALL_THRESHOLD 50       // The threshold for the hall effect sensor - if below the threshold, magnet is detected
 #define HALL_RATIO 50           // The maximum acceptable ratio - if crossed, adjust the path
 #define ROTATION_THRESHOLD 20  // Maximum allowable difference in periods of left and right wheel
@@ -81,20 +81,20 @@ void adjustCourse(int currentSpeedVoltage) {
 
   // Calculate how to adjust the motors
   // NOTE: 115.2 was determined empirically (based on max RPM, ratio between voltage and units (0 to 255))
-  int changeVoltage = (115.2 / ((float) period_left - period_right));
+  int changeVoltage = (int) ((115.2 / ((float) period_left - period_right)));
   
   if (period_left > period_right) {
-    // Left wheel is faster, slow down the left wheel
-    // slowMotorBy(LEFT, changeVoltage);
-    Serial.print("Slow down LEFT  motor by ");
-    //Serial.print(changeVoltage);
-    Serial.print(115.2 / ((float) period_left - period_right));
-    Serial.println(" units");
-    Serial.println("----------");
-  } else {
     // Right wheel is faster, slow down the right wheel
     // slowMotorBy(RIGHT, changeVoltage);
     Serial.print("Slow down RIGHT motor by ");
+    //Serial.print(changeVoltage);
+    Serial.print(changeVoltage);
+    Serial.println(" units");
+    Serial.println("----------");
+  } else {
+    // Left wheel is faster, slow down the left wheel
+    // slowMotorBy(LEFT, changeVoltage);
+    Serial.print("Slow down LEFT  motor by ");
     Serial.print(changeVoltage);
     Serial.println(" units");
     Serial.println("----------");
