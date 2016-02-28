@@ -9,9 +9,10 @@
 #define M2_DIR_PIN 7
 #define M2_SPEED_PIN 6
 
-// Arduino digital pins corresponding to the two principle functionalities
+// Arduino digital pins corresponding to the robot's functionalities
 #define PRNCP_FUNC1_PIN 1
 #define PRNCP_FUNC2_PIN 2
+#define ADD_FUNC_PIN 3
 
 // Robot directions
 #define FORWARD 0
@@ -49,8 +50,37 @@ void setup() {
 }
 
 void loop() {
+  if (digitalRead(PRNCP_FUNC1_PIN)) {
+    prncp_func1();
+  }
+  else if (digitalRead(PRNCP_FUNC2_PIN)) {
+    prncp_func2();
+  }
+  else if (digitalRead(ADD_FUNC_PIN)) {
+    add_func();
+  }
+}
+
+// Executes the first principle function
+
+void prncp_func1() {
   
-  //Test Case 1:
+}
+
+// Executes the second principle function
+
+void prncp_func2() {
+  
+}
+
+// Executes the additional function
+
+void add_func() {
+  
+}
+
+void run_tests() {
+    //Test Case 1:
   //Move forward at MAX_SPEED for one second, then stopping for one second.
   move_forward(MAX_SPEED);
   delay(1000);
@@ -98,18 +128,6 @@ void loop() {
     slow_down(2000);
     delay(1000);
   }
-}
-
-// Executes the first principle function
-
-void prncp_func1() {
-  
-}
-
-// Executes the second principle function
-
-void prncp_func2() {
-  
 }
 
 //------------------------------------------------------------------------------------------------------
