@@ -164,6 +164,14 @@ void slow_down(int time) {
   }
 }
 
+void slow_right(int slow_amount) {
+  analogWrite(M2_SPEED_PIN, current_speed - slow_amount);
+}
+
+void slow_left(int slow_amount) {
+  analogWrite(M1_SPEED_PIN, current_speed - slow_amount);
+}
+
 // Stops the motors from turning
 
 void stop_motors() {

@@ -4,6 +4,24 @@
 #define HALL_RATIO 50           // The maximum acceptable ratio - if crossed, adjust the path
 #define ROTATION_THRESHOLD 20  // Maximum allowable difference in periods of left and right wheel
 
+// Arduino digital pins for controlling DC motors
+#define M1_DIR_PIN 4
+#define M1_SPEED_PIN 5
+#define M2_DIR_PIN 7
+#define M2_SPEED_PIN 6
+
+// Robot directions
+#define FORWARD 0
+#define RIGHT 1
+#define LEFT 2
+
+// Speed constants
+#define MAX_SPEED 255
+#define MIN_SPEED 0 // not moving
+#define SPEED_DEC 5 // decrement value for speed (when slowing down)
+
+int current_speed = 0;
+
 /* Function prototypes */
 void adjustCourse(void);
 float calculateSpeed(int);
@@ -18,7 +36,11 @@ void setup() {
 }
 
 void loop() {
-  adjustCourse(255);
+  move_forward(MAX_SPEED);
+  delay(1000);
+  while(true) {
+    adjustCourse(255);
+  }
 }
 
 void adjustCourse(int currentSpeedVoltage) {
@@ -36,12 +58,14 @@ void adjustCourse(int currentSpeedVoltage) {
   int right_measure;
 
   while (true) {
-    left_measure = analogRead(LEFT_WHEEL);
+    //left_measure = analogRead(LEFT_WHEEL);
     right_measure = analogRead(RIGHT_WHEEL);
 
-    //Serial.print(left_measure);
+    //Serial.println(left_measure);
     //Serial.print("\t");
-    //Serial.println(right_measure);
+    Serial.println(right_measure);
+    delay(250);
+    break;
 
     if (start_left   == 0 && left_measure  < HALL_THRESHOLD) start_left   = millis();
     if (start_right  == 0 && right_measure < HALL_THRESHOLD) start_right  = millis();
@@ -60,10 +84,6 @@ void adjustCourse(int currentSpeedVoltage) {
       Serial.println(start_left);
       Serial.print("start_right:\t");
       Serial.println(start_right);
-      Serial.print("period_left:\t");
-      Serial.println(period_left);
-      Serial.print("period_right:\t");
-      Serial.println(period_right);
       break;
     }
   }
@@ -85,18 +105,87 @@ void adjustCourse(int currentSpeedVoltage) {
   
   if (period_left > period_right) {
     // Right wheel is faster, slow down the right wheel
-    // slowMotorBy(RIGHT, changeVoltage);
+    slow_right(changeVoltage);
     Serial.print("Slow down RIGHT motor by ");
-    //Serial.print(changeVoltage);
     Serial.print(changeVoltage);
     Serial.println(" units");
     Serial.println("----------");
   } else {
     // Left wheel is faster, slow down the left wheel
-    // slowMotorBy(LEFT, changeVoltage);
+    slow_left(changeVoltage);
     Serial.print("Slow down LEFT  motor by ");
-    Serial.print(changeVoltage);
+    Serial.print(-changeVoltage);
     Serial.println(" units");
     Serial.println("----------");
   }
 }
+
+//------------------------------------------------------------------------------------------------------
+
+// Move robot forward at a given speed
+
+void move_forward(int speed) {
+  set_motors(FORWARD);
+  current_speed = speed;
+  analogWrite(M1_SPEED_PIN, speed);
+  analogWrite(M2_SPEED_PIN, speed);
+}
+
+// Turn robot from forward direction towards input direction for 1 ms
+
+void turn_robot(int direction) {
+  set_motors(direction);
+  analogWrite(M1_SPEED_PIN, MAX_SPEED);
+  analogWrite(M2_SPEED_PIN, MAX_SPEED);
+  delay(1);
+  // once turning is finished, stop motors
+  stop_motors();
+}
+
+// Slow down robot from MAX_SPEED to MIN_SPEED
+// time (ms) specifies duration over which robot slows down
+
+void slow_down(int time) {
+  for (int speed = MAX_SPEED; speed > MIN_SPEED; speed -= SPEED_DEC) {
+    current_speed = speed;
+    analogWrite(M1_SPEED_PIN, speed);
+    analogWrite(M2_SPEED_PIN, speed);
+    delay(time / (MAX_SPEED / SPEED_DEC));
+  }
+}
+
+void slow_right(int slow_amount) {
+  analogWrite(M2_SPEED_PIN, current_speed - slow_amount);
+}
+
+void slow_left(int slow_amount) {
+  analogWrite(M1_SPEED_PIN, current_speed - slow_amount);
+}
+
+// Stops the motors from turning
+
+void stop_motors() {
+  analogWrite(M1_SPEED_PIN, MIN_SPEED);
+  analogWrite(M2_SPEED_PIN, MIN_SPEED);
+}
+
+// Set the motors for a desired direction for the robot
+
+void set_motors(int direction) {
+  if (direction == FORWARD) {
+    digitalWrite(M1_DIR_PIN, HIGH);
+    digitalWrite(M2_DIR_PIN, HIGH);
+  }
+  else if (direction == RIGHT) {
+    digitalWrite(M1_DIR_PIN, HIGH );
+    digitalWrite(M2_DIR_PIN, LOW);
+  }
+  else {      // direction == LEFT
+    digitalWrite(M1_DIR_PIN, LOW);
+    digitalWrite(M2_DIR_PIN, HIGH);
+  }
+}
+
+//------------------------------------------------------------------------------------------------------
+
+
