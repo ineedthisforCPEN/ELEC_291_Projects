@@ -37,7 +37,6 @@ void setup() {
 
 void loop() {
   move_forward(MAX_SPEED);
-  delay(1000);
   while(true) {
     adjustCourse(255);
   }
@@ -58,14 +57,12 @@ void adjustCourse(int currentSpeedVoltage) {
   int right_measure;
 
   while (true) {
-    //left_measure = analogRead(LEFT_WHEEL);
+    left_measure = analogRead(LEFT_WHEEL);
     right_measure = analogRead(RIGHT_WHEEL);
 
-    //Serial.println(left_measure);
-    //Serial.print("\t");
+    Serial.print(left_measure);
+    Serial.print("\t");
     Serial.println(right_measure);
-    delay(250);
-    break;
 
     if (start_left   == 0 && left_measure  < HALL_THRESHOLD) start_left   = millis();
     if (start_right  == 0 && right_measure < HALL_THRESHOLD) start_right  = millis();
@@ -80,10 +77,10 @@ void adjustCourse(int currentSpeedVoltage) {
 
     // If both periods have been measured, leave this while loop
     if (period_left != 0 && period_right != 0){
-      Serial.print("start_left:\t");
-      Serial.println(start_left);
-      Serial.print("start_right:\t");
-      Serial.println(start_right);
+      //Serial.print("start_left:\t");
+      //Serial.println(start_left);
+      //Serial.print("start_right:\t");
+      //Serial.println(start_right);
       break;
     }
   }
@@ -101,7 +98,8 @@ void adjustCourse(int currentSpeedVoltage) {
 
   // Calculate how to adjust the motors
   // NOTE: 115.2 was determined empirically (based on max RPM, ratio between voltage and units (0 to 255))
-  int changeVoltage = (int) ((115.2 / ((float) period_left - period_right)));
+  //int changeVoltage = (int) ((115.20 / ((float) period_left - period_right)));
+  int changeVoltage = (int) (((float) period_left - period_right) / 100.0/*115.2*/);
   
   if (period_left > period_right) {
     // Right wheel is faster, slow down the right wheel
