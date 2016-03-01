@@ -27,8 +27,8 @@
 #define TEMPERATURE A0  // Arduino pin to which the LM35 output is connected
 #define SERVO 12        // Arduino pin to which the servo output is connected
 
-#define SENSOR_F A1
-#define SENSOR_L A2
+#define SENSOR_F A2
+#define SENSOR_L A4
 #define SENSOR_R A3
 #define BLACK_THRESHOLD 100
 
@@ -61,7 +61,10 @@ void setup() {
 }
 
 void loop() {
+  
+  
   followLine();
+  //readSensor();
 }
 
 
@@ -126,7 +129,7 @@ void set_motors(int direction) {
     digitalWrite(M1_DIR_PIN, HIGH );
     digitalWrite(M2_DIR_PIN, LOW);
   }
-  else if {direction == LEFT) {
+  else if (direction == LEFT) {
     digitalWrite(M1_DIR_PIN, LOW);
     digitalWrite(M2_DIR_PIN, HIGH);
   }
@@ -145,20 +148,22 @@ void set_motors(int direction) {
 */
 
 void followLine() {
- //unless prompted to leave, the function runs on an infinite loop
- while(true) { 
-    if(leave)
-      break;
-     
+ 
+
     sensorf_value = analogRead(SENSOR_F); //read the front sensor
+    
     
     //if the front sensor detects the path, continue moving forward
     if(sensorf_value <= BLACK_THRESHOLD)
     {
-        move_forward(MAX_SPEED);
-        delay(500);
+        move_forward(MAX_SPEED/2);
+        delay(1);
     }
+    //else
+    //stop_motors();
 
+//}
+    
     else
     {
         sensorl_value = analogRead(SENSOR_L); //read the left sensor
@@ -179,9 +184,9 @@ void followLine() {
         }
 
         //if neither sensor detects the path, move the robot forward a tiny bit and try again
-        else if(sensorl_value <= BLACK_THRESHOLD && sensorr_value <= BLACK_THRESHOLD)
+        else if(sensorl_value > BLACK_THRESHOLD && sensorr_value > BLACK_THRESHOLD)
         {
-              move_forward(MAX_SPEED/2);
+              move_forward(MAX_SPEED/4);
               delay(20);
         }
 
@@ -191,7 +196,7 @@ void followLine() {
               turn_to_check_path(LEFT);
         }
     }
- }
+ 
 }
 
 //Function that turns the robot in a certain direction for 90 degrees. Stops if the front sensor detects the path
@@ -199,12 +204,32 @@ void turn_to_check_path(int direction) {
   for(int i = 0; i <= 150; i++)
   {
     turn_robot(direction);
-    if(analogRead(SENSOR_F) > BLACK_THRESHOLD)
+    if(analogRead(SENSOR_F) <= BLACK_THRESHOLD)
     {
+      //move_forward(MAX_SPEED/4);
       break;
     }
     
   }
+
+}
+
+void readSensor()
+{
+// put your main code here, to run repeatedly
+  int analogF = analogRead(SENSOR_F);
+  int analogL = analogRead(SENSOR_L);
+  int analogR = analogRead(SENSOR_R);
+  
+  //int digital = digitalRead(10);
+  
+  Serial.print(analogL);
+  Serial.print("\t\t");
+  Serial.print(analogF);
+  Serial.print("\t\t");
+  Serial.print(analogR);
+  Serial.println();
+  delay(100);
 
 }
 
