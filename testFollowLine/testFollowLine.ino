@@ -30,7 +30,7 @@
 #define SENSOR_F A2
 #define SENSOR_L A4
 #define SENSOR_R A3
-#define BLACK_THRESHOLD 100
+#define BLACK_THRESHOLD 200
 
 #define STOP_THRESHOLD 40.00
 #define SCAN_THRESHOLD 10.00
@@ -65,6 +65,7 @@ void loop() {
   
   followLine();
   //readSensor();
+  //move_forward(MAX_SPEED);
 }
 
 
@@ -84,8 +85,8 @@ void move_forward(int speed) {
 
 void turn_robot(int direction) {
   set_motors(direction);
-  analogWrite(M1_SPEED_PIN, MAX_SPEED);
-  analogWrite(M2_SPEED_PIN, MAX_SPEED);
+  analogWrite(M1_SPEED_PIN, 175);
+  analogWrite(M2_SPEED_PIN, 175);
   delay(1);
   // once turning is finished, stop motors
   stop_motors();
@@ -154,7 +155,7 @@ void followLine() {
     
     
     //if the front sensor detects the path, continue moving forward
-    if(sensorf_value <= BLACK_THRESHOLD)
+    if(sensorf_value > BLACK_THRESHOLD)
     {
         move_forward(MAX_SPEED/2);
         delay(1);
@@ -171,23 +172,23 @@ void followLine() {
 
         //if the left sensor detects the path AND the right sensor does not, turn the robot to the left until the front sensor detects the path again,
         //and then continue moving forward
-        if(sensorl_value <= BLACK_THRESHOLD && sensorr_value > BLACK_THRESHOLD)
+        if(sensorl_value > BLACK_THRESHOLD && sensorr_value <= BLACK_THRESHOLD)
         {
               turn_to_check_path(LEFT);
         }
 
         //if the right sensor detects the path AND the left sensor does not, turn the robot to the right until the front sensor detects the path again,
         //and then continue moving forward
-        else if(sensorl_value > BLACK_THRESHOLD && sensorr_value <= BLACK_THRESHOLD)
+        else if(sensorl_value <= BLACK_THRESHOLD && sensorr_value > BLACK_THRESHOLD)
         {
               turn_to_check_path(RIGHT);
         }
 
         //if neither sensor detects the path, move the robot forward a tiny bit and try again
-        else if(sensorl_value > BLACK_THRESHOLD && sensorr_value > BLACK_THRESHOLD)
+        else if(sensorl_value <= BLACK_THRESHOLD && sensorr_value <= BLACK_THRESHOLD)
         {
-              move_forward(MAX_SPEED/4);
-              delay(20);
+              move_forward(MAX_SPEED);
+              delay(1);
         }
 
         //if both sensors detect the path, turn the robot left until the front sensor detects the path
@@ -204,11 +205,13 @@ void turn_to_check_path(int direction) {
   for(int i = 0; i <= 150; i++)
   {
     turn_robot(direction);
-    if(analogRead(SENSOR_F) <= BLACK_THRESHOLD)
+    if(analogRead(SENSOR_F) > BLACK_THRESHOLD)
     {
       //move_forward(MAX_SPEED/4);
+      //delay(10);
       break;
     }
+    
     
   }
 
