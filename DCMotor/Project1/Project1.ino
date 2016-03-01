@@ -28,6 +28,7 @@
 #define TEMPERATURE A0  // Arduino pin to which the LM35 output is connected
 #define SERVO 12        // Arduino pin to which the servo output is connected
 
+// Optical sensors
 #define SENSOR_F A1
 #define SENSOR_L A2
 #define SENSOR_R A3
@@ -63,9 +64,6 @@ void setup() {
 }
 
 void loop() {
-  move_forward(MAX_SPEED);
-
-/*
   if (digitalRead(PRNCP_FUNC1_PIN)) {
     prncp_func1();
   }
@@ -75,13 +73,12 @@ void loop() {
   else if (digitalRead(ADD_FUNC_PIN)) {
     add_func();
   }
-  */
 }
 
 // Executes the first principle function
 
 void prncp_func1() {
-    int obstacleDistance;
+  int obstacleDistance;
   int i;
 
   move_forward(MAX_SPEED);
@@ -129,7 +126,7 @@ void prncp_func2() {
 // Executes the additional function
 
 void add_func() {
-  
+  //nothing here yet
 }
 
 void run_tests() {
@@ -219,12 +216,51 @@ void slow_down(int time) {
   }
 }
 
-void slow_right(int slow_amount) {
-  analogWrite(M2_SPEED_PIN, current_right_speed - slow_amount);
+void speed_right(int speed_amount) {
+  int desired_right_speed = current_right_speed + speed_amount;
+  if (desired_right_speed > MAX_SPEED) {
+    analogWrite(M2_SPEED_PIN, MAX_SPEED);
+    current_right_speed = MAX_SPEED;
+  }
+  else {
+    analogWrite(M2_SPEED_PIN, desired_right_speed);
+    current_right_speed = desired_right_speed;
+  }
 }
 
+void speed_left(int speed_amount) {
+  int desired_left_speed = current_left_speed + speed_amount;
+  if (desired_left_speed > MAX_SPEED) {
+    analogWrite(M1_SPEED_PIN, MAX_SPEED);
+    current_left_speed = MAX_SPEED;
+  }
+  else {
+    analogWrite(M1_SPEED_PIN, desired_left_speed);
+    current_left_speed = desired_left_speed;
+  }
+}
+
+void slow_right(int slow_amount) {
+  int desired_right_speed = current_right_speed - speed_amount;
+  if (desired_right_speed < MIN_SPEED) {
+    analogWrite(M2_SPEED_PIN, MIN_SPEED);
+    current_right_speed = MIN_SPEED;
+  }
+  else {
+    analogWrite(M2_SPEED_PIN, desired_right_speed);
+    current_right_speed = desired_right_speed;
+  }
+
 void slow_left(int slow_amount) {
-  analogWrite(M1_SPEED_PIN, current_left_speed - slow_amount);
+  int desired_left_speed = current_left_speed - speed_amount;
+  if (desired_left_speed < MIN_SPEED) {
+    analogWrite(M1_SPEED_PIN, MIN_SPEED);
+    current_left_speed = MIN_SPEED;
+  }
+  else {
+    analogWrite(M1_SPEED_PIN, desired_left_speed);
+    current_left_speed = desired_left_speed;
+  }
 }
 
 // Stops the motors from turning
