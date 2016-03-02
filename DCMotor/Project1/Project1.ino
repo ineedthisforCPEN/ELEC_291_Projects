@@ -145,57 +145,6 @@ void extra_func() {
   //nothing here yet
 }
 
-void run_tests() {
-    //Test Case 1:
-  //Move forward at MAX_SPEED for one second, then stopping for one second.
-  move_forward(MAX_SPEED);
-  delay(1000);
-  stop_motors();
-  delay(1000);
-  
-  //Test Case 2:
-  //Turn left at MAX_SPEED for one second, then stopping for one second.
-  for (int i = 0; i < 1000; i++) {
-    turn_robot(LEFT, FUNC1_TURN_SPEED);
-  }
-  delay(1000);
-  //Test Case 3:
-  //Turn right at MAX_SPEED for one second, then stopping for one second.
-  for (int i = 0; i < 1000; i++) {
-    turn_robot(RIGHT, FUNC2_TURN_SPEED);
-  }
-  delay(1000);
-
-
-  //Test Case 4:
-  //Only run one of the motors
-  int value;
-  for (value = 0 ; value <= 255; value += 5)
-  {
-    digitalWrite(M2_DIR_PIN, LOW);
-    //digitalWrite(M2, HIGH);
-    analogWrite(M2_SPEED_PIN, value);   //PWM Speed Control
-    //analogWrite(E2, value);   //PWM Speed Control
-    delay(30);
-  }
-
-  //Test Case 5:
-  //Move forward for maximum speed, when an object is detected to be within our threshold of 50cm, slow down the robot
-  //Robot should come to a stop in 2 seconds
-  
-  move_forward(MAX_SPEED);
-  //turn_left(2000);
-  //turn_left(150);
-
-  float dist;
-//  dist = distanceFromSensor();
-  Serial.println(dist);
-  if (dist < 50.00) {
-    slow_down(2000);
-    delay(1000);
-  }
-}
-
 //------------------------------------------------------------------------------------------------------
 
 // Move robot forward at a given speed
@@ -316,6 +265,10 @@ void set_motors(int direction) {
     digitalWrite(M1_DIR_PIN, LOW);
     digitalWrite(M2_DIR_PIN, HIGH);
   }
+  else {  // BACKWARDS
+    digitalWrite(M1_DIR_PIN, LOW);
+    digitalWrite(M2_DIR_PIN, LOW);
+  }
 }
 
 //------------------------------------------------
@@ -390,10 +343,6 @@ void followLine() {
         move_forward(MAX_SPEED/2);
         delay(1);
     }
-    //else
-    //stop_motors();
-
-//}
     
     else
     {
