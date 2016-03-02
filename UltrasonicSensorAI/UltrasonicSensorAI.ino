@@ -1,29 +1,48 @@
 #include <Servo.h>
 
-#define M1_DIR_PIN 4
-#define M1_SPEED_PIN 5
-#define M2_DIR_PIN 7
-#define M2_SPEED_PIN 6
-#define ECHO 12         // Arduino pin to which the ultrasonic sensor's echo pin is connected
-#define TRIGGER 11      // Arduino pin to which the ultrasonic sensor's trigger pin is connected
-#define TEMPERATURE A0  // Arduino pin to which the LM35 output is connected
-#define SERVO 10        // Arduino pin to which the servo output is connected
-#define LEFT_WHEEL A5
-#define RIGHT_WHEEL A6
-#define FORWARD 0
-#define LEFT 1
-#define RIGHT 2
+//--------------------------------------
+// PIN DEFINITIONS
+//--------------------------------------
+
+// Define Arduino pins used for the motor
+#define M1_DIR_PIN    4   // Direction pin for left motor
+#define M1_SPEED_PIN  5   // Speed pin for the left motor
+#define M2_DIR_PIN    7   // Direction pin for the right motor
+#define M2_SPEED_PIN  6   // Speed pin for the right motor
+
+// Define Arduino pins used for the ultrasonic sensor
+#define ECHO        12    // Arduino pin to which the ultrasonic sensor's echo pin is connected
+#define TRIGGER     11    // Arduino pin to which the ultrasonic sensor's trigger pin is connected
+#define TEMPERATURE A0    // Arduino pin to which the LM35 output is connected
+#define SERVO       10    // Arduino pin to which the servo output is connected
+
+// Define Arduino pins used for the hall effect sensors
+#define LEFT_WHEEL  A5    // Hall effect sensor on left side
+#define RIGHT_WHEEL A6    // Hall effect sensor on right side
+
+//--------------------------------------
+// CONSTANT DEFINITIONS
+//--------------------------------------
+
+// Constants for motor direction (i.e. enumerating directions)
+#define FORWARD   0
+#define LEFT      1
+#define RIGHT     2
 #define BACKWARDS 3
 
-#define MAX_SPEED 255
-#define MIN_SPEED 0 // not moving
-#define SPEED_DEC 5 // decrement value for speed
+// Constants for motor control
+#define MAX_SPEED 255     // Maximum speed
+#define TURN_SPEED 175    // Speed at which to turn
+#define MIN_SPEED 0       // Not moving
+#define SPEED_DEC 5       // Decrement value for speed
 
-#define STOP_THRESHOLD 40.00
-#define SCAN_THRESHOLD 10.00
-#define SLOW_DOWN_TIME 1000
-#define HALL_THRESHOLD 50
-#define ROTATION_THRESHOLD 20
+// Other consants
+#define STOP_THRESHOLD 45.00    // If distance measured is less than this, start slowing down
+#define SCAN_THRESHOLD 10.00    // If distance measured is less that this, definitely don't turn in this direction
+#define SLOW_DOWN_TIME 1000     // How many milliseconds it will take to slow down
+#define TURN_TIME 300           // How many milliseconds the robot will turn for
+#define HALL_THRESHOLD 50       // Anything below this value means a magnet is detected
+#define ROTATION_THRESHOLD 20   // How many milliseconds of difference between wheel periods is acceptable
 
 /* Function prototupes */
 int scanEnvironment(void);
@@ -50,6 +69,8 @@ void setup() {
   pinMode(TRIGGER, OUTPUT);
   pinMode(TEMPERATURE, INPUT);
   scanningServo.attach(SERVO);
+
+  scanningServo.write(90);
 }
 
 void loop() {
@@ -76,14 +97,14 @@ void loop() {
   turnDirection = scanEnvironment();
   switch(turnDirection) {
     case LEFT:
-      for (i = 0; i < 300; i++) {
-        turn_robot(LEFT, MAX_SPEED);
+      for (i = 0; i < TURN_TIME; i++) {
+        turn_robot(LEFT, TURN_SPEED);
       }
       Serial.println("TURNING LEFT");
       break;
     case RIGHT:
-      for (i = 0; i < 300; i++) {
-        turn_robot(RIGHT, MAX_SPEED);
+      for (i = 0; i < TURN_TIME; i++) {
+        turn_robot(RIGHT, TURN_SPEED);
       }
       Serial.println("TURNING RIGHT");
       break;
@@ -132,7 +153,9 @@ int scanEnvironment(void) {
   }
 
   // Measure the distance to the nearest object
+  delay(100);
   rightDistance = distanceFromSensor();
+  delay(100);
   Serial.print("Right:\t");
   Serial.println(rightDistance);
 
@@ -143,7 +166,9 @@ int scanEnvironment(void) {
   }
 
   // Measure the distance to the nearest object
+  delay(100);
   leftDistance = distanceFromSensor();
+  delay(100);
   Serial.print("Left:\t");
   Serial.println(leftDistance);
 
@@ -151,6 +176,7 @@ int scanEnvironment(void) {
   while (currentServoDegrees > 90) {
     scanningServo.write(--currentServoDegrees);
   }
+  delay(200);
 
   if (leftDistance < SCAN_THRESHOLD && rightDistance < SCAN_THRESHOLD) {
     // If stuck, move backwards
@@ -277,7 +303,7 @@ float distanceFromSensor(void) {
   unsigned long echoTime = pulseIn(ECHO, HIGH);
 
   // Build in delay with calculatePeriod(), so we do not need to delay an extra 50ms after calling this function
-  float period = calculatePeriod();
+  float period = 58.0; //calculatePeriod();
 
   // Return the distance (in centimeters)
   float distance = (float) echoTime / period;
@@ -406,6 +432,10 @@ void set_motors(int direction) {
   else if (direction == LEFT) {
     digitalWrite(M1_DIR_PIN, LOW);
     digitalWrite(M2_DIR_PIN, HIGH);
+  }
+  else {
+    digitalWrite(M1_DIR_PIN, LOW);
+    digitalWrite(M2_DIR_PIN, LOW);
   }
 }
 
