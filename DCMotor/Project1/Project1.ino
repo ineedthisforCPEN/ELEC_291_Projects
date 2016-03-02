@@ -52,6 +52,8 @@ int switch_A_status;
 int switch_B_status;
 
 void setup() {
+  
+  //enable all the sensors
   Serial.begin(9600);
 
   pinMode(SWITCH_A_PIN, INPUT);
@@ -71,6 +73,9 @@ void setup() {
 
 void loop() {
 
+  /*determine which position the switch is in. Once the the position of the switch is determined, the robot with carry out principle function 1, or 2, or the extra function we programmed
+  
+  */
   switch_A_status = digitalRead(SWITCH_A_PIN);
   switch_B_status = digitalRead(SWITCH_B_PIN);
   
@@ -97,6 +102,10 @@ void prncp_func1() {
   move_forward(MAX_SPEED);
   
   obstacleDistance = distanceFromSensor();
+  
+  //check if there is a object in front of the travelling path 
+  //then check left and right to find a way to go around it
+  //Back up if needed
   if (obstacleDistance <= STOP_THRESHOLD) {
     int turnDirection;
     
@@ -391,6 +400,10 @@ void followLine() {
     //stop_motors();
 
 //}
+    
+    
+    //determines if the path is  on the left or right by comparing the data read in from the left and right optical sensors
+    
     
     else
     {
