@@ -14,9 +14,11 @@
 #define M2_SPEED_PIN 6
 
 // Arduino digital pins corresponding to the robot's functionalities
-#define PRNCP_FUNC1_PIN 1
-#define PRNCP_FUNC2_PIN 2
-#define ADD_FUNC_PIN 3
+#define SWITCH_A_PIN 2
+#define SWITCH_B_PIN 3
+
+#define ON 1
+#define OFF 0
 
 // Robot directions
 #define FORWARD 0
@@ -46,16 +48,14 @@ int currentServoDegrees = 90;   // Servo is initially facing forwards
 int current_left_speed = 0;
 int current_right_speed = 0;
 
-/*
-float distanceFromSensor(void);
-int scanEnvironment(void);
-void followLine(void);*/
+int switch_A_status;
+int switch_B_status;
 
 void setup() {
   Serial.begin(9600);
 
-  pinMode(PRNCP_FUNC1_PIN, INPUT);
-  pinMode(PRNCP_FUNC2_PIN, INPUT);
+  pinMode(SWITCH_A_PIN, INPUT);
+  pinMode(SWITCH_B_PIN, INPUT);
   pinMode(M1_DIR_PIN, OUTPUT);
   pinMode(M2_DIR_PIN, OUTPUT);
 
@@ -70,14 +70,21 @@ void setup() {
 }
 
 void loop() {
-  if (digitalRead(PRNCP_FUNC1_PIN)) {
+
+  switch_A_status = digitalRead(SWITCH_A_PIN);
+  switch_B_status = digitalRead(SWITCH_B_PIN);
+  
+  if (switch_A_status == ON && switch_B_status == OFF) {
     prncp_func1();
   }
-  else if (digitalRead(PRNCP_FUNC2_PIN)) {
+  else if (switch_A_status == OFF && switch_B_status == ON) {
     prncp_func2();
   }
-  else if (digitalRead(ADD_FUNC_PIN)) {
-    add_func();
+  else if (switch_A_status == ON && switch_B_status == ON) {
+    extra_func();
+  }
+  else {
+    stop_motors();
   }
 }
 
@@ -129,9 +136,9 @@ void prncp_func2() {
   followLine(); 
 }
 
-// Executes the additional function
+// Executes the extra function
 
-void add_func() {
+void extra_func() {
   //nothing here yet
 }
 
