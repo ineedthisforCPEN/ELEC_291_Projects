@@ -4,7 +4,8 @@
 #define MAX_SPEED 255
 #define MIN_SPEED 0 // not moving
 #define SPEED_DEC 5 // decrement value for speed (when slowing down)
-#define TURN_SPEED 175
+#define FUNC1_TURN_SPEED 255
+#define FUNC2_TURN_SPEED 175
 
 // Arduino digital pins for controlling DC motors
 #define M1_DIR_PIN 4
@@ -45,6 +46,11 @@ int currentServoDegrees = 90;   // Servo is initially facing forwards
 int current_left_speed = 0;
 int current_right_speed = 0;
 
+/*
+float distanceFromSensor(void);
+int scanEnvironment(void);
+void followLine(void);*/
+
 void setup() {
   Serial.begin(9600);
 
@@ -78,7 +84,7 @@ void loop() {
 // Executes the first principle function
 
 void prncp_func1() {
-  int obstacleDistance;
+  float obstacleDistance;
   int i;
 
   move_forward(MAX_SPEED);
@@ -97,13 +103,13 @@ void prncp_func1() {
     switch(turnDirection) {
       case LEFT:
         for (i = 0; i < 300; i++) {
-          turn_robot(LEFT);
+          turn_robot(LEFT, FUNC1_TURN_SPEED);
         }
         Serial.println("TURNING LEFT");
         break;
       case RIGHT:
         for (i = 0; i < 300; i++) {
-          turn_robot(RIGHT);
+          turn_robot(RIGHT, FUNC2_TURN_SPEED);
         }
         Serial.println("TURNING RIGHT");
         break;
@@ -140,13 +146,13 @@ void run_tests() {
   //Test Case 2:
   //Turn left at MAX_SPEED for one second, then stopping for one second.
   for (int i = 0; i < 1000; i++) {
-    turn_robot(LEFT);
+    turn_robot(LEFT, FUNC1_TURN_SPEED);
   }
   delay(1000);
   //Test Case 3:
   //Turn right at MAX_SPEED for one second, then stopping for one second.
   for (int i = 0; i < 1000; i++) {
-    turn_robot(RIGHT);
+    turn_robot(RIGHT, FUNC2_TURN_SPEED);
   }
   delay(1000);
 
@@ -194,10 +200,10 @@ void move_forward(int speed) {
 
 // Turn robot from forward direction towards input direction for 1 ms
 
-void turn_robot(int direction) {
+void turn_robot(int direction, int turn_speed) {
   set_motors(direction);
-  analogWrite(M1_SPEED_PIN, TURN_SPEED);
-  analogWrite(M2_SPEED_PIN, TURN_SPEED);
+  analogWrite(M1_SPEED_PIN, turn_speed);
+  analogWrite(M2_SPEED_PIN, turn_speed);
   delay(1);
   // once turning is finished, stop motors
   stop_motors();
@@ -216,51 +222,66 @@ void slow_down(int time) {
   }
 }
 
-void speed_right(int speed_amount) {
-  int desired_right_speed = current_right_speed + speed_amount;
-  if (desired_right_speed > MAX_SPEED) {
-    analogWrite(M2_SPEED_PIN, MAX_SPEED);
-    current_right_speed = MAX_SPEED;
+// Speeds up the motor (RIGHT or LEFT) by a given amount.
+
+void speedup_motor(int motor, int amount) {
+
+  int desired_speed;
+  if (motor == RIGHT) {
+    desired_speed = current_right_speed + amount;
+    if (desired_speed > MAX_SPEED) {
+      analogWrite(M2_SPEED_PIN, MAX_SPEED);
+      current_right_speed = MAX_SPEED;
+    }
+    else {
+      analogWrite(M2_SPEED_PIN, desired_speed);
+      current_right_speed = desired_speed;
+    }
   }
-  else {
-    analogWrite(M2_SPEED_PIN, desired_right_speed);
-    current_right_speed = desired_right_speed;
+  
+  else if (motor == LEFT) {
+    desired_speed = current_left_speed + amount;
+    if (desired_speed > MAX_SPEED) {
+      analogWrite(M1_SPEED_PIN, MAX_SPEED);
+      current_left_speed = MAX_SPEED;
+    }
+    else {
+      analogWrite(M1_SPEED_PIN, desired_speed);
+      current_left_speed = desired_speed;
+    }
   }
+   
 }
 
-void speed_left(int speed_amount) {
-  int desired_left_speed = current_left_speed + speed_amount;
-  if (desired_left_speed > MAX_SPEED) {
-    analogWrite(M1_SPEED_PIN, MAX_SPEED);
-    current_left_speed = MAX_SPEED;
-  }
-  else {
-    analogWrite(M1_SPEED_PIN, desired_left_speed);
-    current_left_speed = desired_left_speed;
-  }
-}
+// Slows down the motor (RIGHT or LEFT) by a given amount.
 
-void slow_right(int slow_amount) {
-  int desired_right_speed = current_right_speed - speed_amount;
-  if (desired_right_speed < MIN_SPEED) {
-    analogWrite(M2_SPEED_PIN, MIN_SPEED);
-    current_right_speed = MIN_SPEED;
-  }
-  else {
-    analogWrite(M2_SPEED_PIN, desired_right_speed);
-    current_right_speed = desired_right_speed;
-  }
+void slowdown_motor(int motor, int amount) {
 
-void slow_left(int slow_amount) {
-  int desired_left_speed = current_left_speed - speed_amount;
-  if (desired_left_speed < MIN_SPEED) {
-    analogWrite(M1_SPEED_PIN, MIN_SPEED);
-    current_left_speed = MIN_SPEED;
+  int desired_speed;
+  if (motor == RIGHT) {
+    desired_speed = current_right_speed - amount;
+    if (desired_speed < MIN_SPEED) {
+      analogWrite(M2_SPEED_PIN, MIN_SPEED);
+      current_right_speed = MIN_SPEED;
+    }
+    else {
+      analogWrite(M2_SPEED_PIN, desired_speed);
+      current_right_speed = desired_speed;
+    }
   }
-  else {
-    analogWrite(M1_SPEED_PIN, desired_left_speed);
-    current_left_speed = desired_left_speed;
+  
+  else if (motor == LEFT) {
+    desired_speed = current_left_speed - amount;
+    if (desired_speed < MIN_SPEED) {
+      analogWrite(M1_SPEED_PIN, MIN_SPEED);
+      current_left_speed = MIN_SPEED;
+    }
+    else {
+      analogWrite(M1_SPEED_PIN, desired_speed);
+      current_left_speed = desired_speed;
+    }
   }
+   
 }
 
 // Stops the motors from turning
@@ -324,7 +345,7 @@ float calculatePeriod(void) {
  * 
  * Distance in cm = Echo pulse width (in us) / period
  */
-float distanceFromSensor(void) {
+float distanceFromSensor() {
   // Send a start signal to the trigger pin
   digitalWrite(TRIGGER, HIGH);
   delayMicroseconds(10);
@@ -387,7 +408,6 @@ void followLine() {
         else if(sensorl_value <= BLACK_THRESHOLD && sensorr_value <= BLACK_THRESHOLD)
         {
               move_forward(MAX_SPEED);
-              delay(1);
         }
 
         //if both sensors detect the path, turn the robot left until the front sensor detects the path
@@ -403,14 +423,12 @@ void followLine() {
 void turn_to_check_path(int direction) {
   for(int i = 0; i <= 150; i++)
   {
-    turn_robot(direction);
+    turn_robot(direction, FUNC2_TURN_SPEED);
     if(analogRead(SENSOR_F) > BLACK_THRESHOLD)
     {
       break;
     }
-    
   }
-
 }
 
 //------------------------------------------------
@@ -434,8 +452,7 @@ void turn_to_check_path(int direction) {
  *         BACKWARDS (2) if robot should go backwards
  */
 int scanEnvironment(void) {
-  int leftDistance;
-  int rightDistance;
+  float leftDistance, rightDistance;
   
   // Smoothly turn the sensor to face the left
   while (currentServoDegrees > 0) {
