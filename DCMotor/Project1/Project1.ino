@@ -4,6 +4,7 @@
 #define MAX_SPEED 255
 #define MIN_SPEED 0 // not moving
 #define SPEED_DEC 5 // decrement value for speed (when slowing down)
+#define TURN_SPEED 175
 
 // Arduino digital pins for controlling DC motors
 #define M1_DIR_PIN 4
@@ -27,10 +28,11 @@
 #define TEMPERATURE A0  // Arduino pin to which the LM35 output is connected
 #define SERVO 12        // Arduino pin to which the servo output is connected
 
+// Optical sensors
 #define SENSOR_F A1
 #define SENSOR_L A2
 #define SENSOR_R A3
-#define BLACK_THRESHOLD 100
+#define BLACK_THRESHOLD 200
 
 #define STOP_THRESHOLD 40.00
 #define SCAN_THRESHOLD 10.00
@@ -40,7 +42,8 @@ Servo scanningServo;
 bool leave = false;
 int sensorf_value, sensorl_value, sensorr_value = 0;
 int currentServoDegrees = 90;   // Servo is initially facing forwards
-int current_speed = 0;
+int current_left_speed = 0;
+int current_right_speed = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -75,7 +78,7 @@ void loop() {
 // Executes the first principle function
 
 void prncp_func1() {
-    int obstacleDistance;
+  int obstacleDistance;
   int i;
 
   move_forward(MAX_SPEED);
@@ -117,13 +120,13 @@ void prncp_func1() {
 // Executes the second principle function
 
 void prncp_func2() {
-  
+  followLine(); 
 }
 
 // Executes the additional function
 
 void add_func() {
-  
+  //nothing here yet
 }
 
 void run_tests() {
@@ -169,7 +172,7 @@ void run_tests() {
   //turn_left(150);
 
   float dist;
-  dist = distanceFromSensor();
+//  dist = distanceFromSensor();
   Serial.println(dist);
   if (dist < 50.00) {
     slow_down(2000);
@@ -183,7 +186,8 @@ void run_tests() {
 
 void move_forward(int speed) {
   set_motors(FORWARD);
-  current_speed = speed;
+  current_left_speed = speed;
+  current_right_speed = speed;
   analogWrite(M1_SPEED_PIN, speed);
   analogWrite(M2_SPEED_PIN, speed);
 }
@@ -192,8 +196,8 @@ void move_forward(int speed) {
 
 void turn_robot(int direction) {
   set_motors(direction);
-  analogWrite(M1_SPEED_PIN, MAX_SPEED);
-  analogWrite(M2_SPEED_PIN, MAX_SPEED);
+  analogWrite(M1_SPEED_PIN, TURN_SPEED);
+  analogWrite(M2_SPEED_PIN, TURN_SPEED);
   delay(1);
   // once turning is finished, stop motors
   stop_motors();
@@ -204,19 +208,59 @@ void turn_robot(int direction) {
 
 void slow_down(int time) {
   for (int speed = MAX_SPEED; speed > MIN_SPEED; speed -= SPEED_DEC) {
-    current_speed = speed;
+    current_left_speed = speed;
+    current_right_speed = speed;
     analogWrite(M1_SPEED_PIN, speed);
     analogWrite(M2_SPEED_PIN, speed);
     delay(time / (MAX_SPEED / SPEED_DEC));
   }
 }
 
-void slow_right(int slow_amount) {
-  analogWrite(M2_SPEED_PIN, current_speed - slow_amount);
+void speed_right(int speed_amount) {
+  int desired_right_speed = current_right_speed + speed_amount;
+  if (desired_right_speed > MAX_SPEED) {
+    analogWrite(M2_SPEED_PIN, MAX_SPEED);
+    current_right_speed = MAX_SPEED;
+  }
+  else {
+    analogWrite(M2_SPEED_PIN, desired_right_speed);
+    current_right_speed = desired_right_speed;
+  }
 }
 
+void speed_left(int speed_amount) {
+  int desired_left_speed = current_left_speed + speed_amount;
+  if (desired_left_speed > MAX_SPEED) {
+    analogWrite(M1_SPEED_PIN, MAX_SPEED);
+    current_left_speed = MAX_SPEED;
+  }
+  else {
+    analogWrite(M1_SPEED_PIN, desired_left_speed);
+    current_left_speed = desired_left_speed;
+  }
+}
+
+void slow_right(int slow_amount) {
+  int desired_right_speed = current_right_speed - speed_amount;
+  if (desired_right_speed < MIN_SPEED) {
+    analogWrite(M2_SPEED_PIN, MIN_SPEED);
+    current_right_speed = MIN_SPEED;
+  }
+  else {
+    analogWrite(M2_SPEED_PIN, desired_right_speed);
+    current_right_speed = desired_right_speed;
+  }
+
 void slow_left(int slow_amount) {
-  analogWrite(M1_SPEED_PIN, current_speed - slow_amount);
+  int desired_left_speed = current_left_speed - speed_amount;
+  if (desired_left_speed < MIN_SPEED) {
+    analogWrite(M1_SPEED_PIN, MIN_SPEED);
+    current_left_speed = MIN_SPEED;
+  }
+  else {
+    analogWrite(M1_SPEED_PIN, desired_left_speed);
+    current_left_speed = desired_left_speed;
+  }
 }
 
 // Stops the motors from turning
@@ -237,7 +281,7 @@ void set_motors(int direction) {
     digitalWrite(M1_DIR_PIN, HIGH );
     digitalWrite(M2_DIR_PIN, LOW);
   }
-  else if {direction == LEFT) {
+  else if (direction == LEFT) {
     digitalWrite(M1_DIR_PIN, LOW);
     digitalWrite(M2_DIR_PIN, HIGH);
   }
@@ -307,20 +351,19 @@ float distanceFromSensor(void) {
 */
 
 void followLine() {
- //unless prompted to leave, the function runs on an infinite loop
- while(true) { 
-    if(leave)
-      break;
-     
     sensorf_value = analogRead(SENSOR_F); //read the front sensor
     
     //if the front sensor detects the path, continue moving forward
-    if(sensorf_value <= BLACK_THRESHOLD)
+    if(sensorf_value > BLACK_THRESHOLD)
     {
-        move_forward(MAX_SPEED);
-        delay(500);
+        move_forward(MAX_SPEED/2);
+        delay(1);
     }
+    //else
+    //stop_motors();
 
+//}
+    
     else
     {
         sensorl_value = analogRead(SENSOR_L); //read the left sensor
@@ -328,14 +371,14 @@ void followLine() {
 
         //if the left sensor detects the path AND the right sensor does not, turn the robot to the left until the front sensor detects the path again,
         //and then continue moving forward
-        if(sensorl_value <= BLACK_THRESHOLD && sensorr_value > BLACK_THRESHOLD)
+        if(sensorl_value > BLACK_THRESHOLD && sensorr_value <= BLACK_THRESHOLD)
         {
               turn_to_check_path(LEFT);
         }
 
         //if the right sensor detects the path AND the left sensor does not, turn the robot to the right until the front sensor detects the path again,
         //and then continue moving forward
-        else if(sensorl_value > BLACK_THRESHOLD && sensorr_value <= BLACK_THRESHOLD)
+        else if(sensorl_value <= BLACK_THRESHOLD && sensorr_value > BLACK_THRESHOLD)
         {
               turn_to_check_path(RIGHT);
         }
@@ -343,8 +386,8 @@ void followLine() {
         //if neither sensor detects the path, move the robot forward a tiny bit and try again
         else if(sensorl_value <= BLACK_THRESHOLD && sensorr_value <= BLACK_THRESHOLD)
         {
-              move_forward(MAX_SPEED/2);
-              delay(20);
+              move_forward(MAX_SPEED);
+              delay(1);
         }
 
         //if both sensors detect the path, turn the robot left until the front sensor detects the path
@@ -353,7 +396,7 @@ void followLine() {
               turn_to_check_path(LEFT);
         }
     }
- }
+ 
 }
 
 //Function that turns the robot in a certain direction for 90 degrees. Stops if the front sensor detects the path
