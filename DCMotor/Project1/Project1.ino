@@ -403,7 +403,7 @@ void followLine() {
     
     
     //determines if the path is  on the left or right by comparing the data read in from the left and right optical sensors
-    
+    //change the direction of the robot to stay on path
     
     else
     {
