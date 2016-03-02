@@ -71,6 +71,8 @@ void setup() {
 
 void loop() {
 
+  move_forward(MAX_SPEED);
+  /*
   switch_A_status = digitalRead(SWITCH_A_PIN);
   switch_B_status = digitalRead(SWITCH_B_PIN);
   
@@ -86,6 +88,7 @@ void loop() {
   else {
     stop_motors();
   }
+  */
 }
 
 // Executes the first principle function
