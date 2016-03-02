@@ -1,18 +1,30 @@
+#define FRONT A4
+#define LEFT A3
+#define RIGHT A5
+
 void setup() {
   // put your setup code here, to run once:
-  pinMode(A0, INPUT);
+  pinMode(FRONT, INPUT);
+  pinMode(LEFT, INPUT);
+  pinMode(RIGHT, INPUT);
   //pinMode(10, INPUT);
+  
   Serial.begin(9600);
 }
 
 void loop() {
   // put your main code here, to run repeatedly
-  int analog = analogRead(A0);
+  int analogF = analogRead(FRONT);
+  int analogL = analogRead(LEFT);
+  int analogR = analogRead(RIGHT);
+  
   //int digital = digitalRead(10);
   
-  Serial.print(analog);
+  Serial.print(analogL);
   Serial.print("\t\t");
-  //Serial.print(digital);
+  Serial.print(analogF);
+  Serial.print("\t\t");
+  Serial.print(analogR);
   Serial.println();
   delay(100);
 }

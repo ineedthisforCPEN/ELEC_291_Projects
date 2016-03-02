@@ -21,6 +21,8 @@
 #define SPEED_DEC 5 // decrement value for speed (when slowing down)
 
 int current_speed = 0;
+int left_speed = 0;
+int right_speed = 0;
 
 /* Function prototypes */
 void adjustCourse(void);
@@ -36,7 +38,9 @@ void setup() {
 }
 
 void loop() {
-  move_forward(MAX_SPEED);
+  set_motors(FORWARD);
+  analogWrite(M1_SPEED_PIN, 255);
+  analogWrite(M2_SPEED_PIN, 230);
   while(true) {
     adjustCourse(255);
   }
@@ -95,22 +99,21 @@ void adjustCourse(int currentSpeedVoltage) {
   Serial.print("Period of RIGHT wheel: \t");
   Serial.println(period_right);
   Serial.println();
-
-  // Calculate how to adjust the motors
-  // NOTE: 115.2 was determined empirically (based on max RPM, ratio between voltage and units (0 to 255))
-  //int changeVoltage = (int) ((115.20 / ((float) period_left - period_right)));
-  int changeVoltage = (int) (((float) period_left - period_right) / 100.0/*115.2*/);
   
   if (period_left > period_right) {
     // Right wheel is faster, slow down the right wheel
-    slow_right(changeVoltage);
+    int changeVoltage = (int) (256.0 * ((float)(period_left - period_right))/0.45);
+    //slow_right(changeVoltage);
+    slow_right((int) (0.2*(period_left - period_right)));
     Serial.print("Slow down RIGHT motor by ");
     Serial.print(changeVoltage);
     Serial.println(" units");
     Serial.println("----------");
   } else {
     // Left wheel is faster, slow down the left wheel
-    slow_left(changeVoltage);
+    int changeVoltage = (int) (256.0 * ((float)(period_right - period_left))/0.45);
+    //slow_left(changeVoltage);
+    slow_left((int) (0.2*(period_left - period_right)));
     Serial.print("Slow down LEFT  motor by ");
     Serial.print(-changeVoltage);
     Serial.println(" units");
@@ -125,6 +128,8 @@ void adjustCourse(int currentSpeedVoltage) {
 void move_forward(int speed) {
   set_motors(FORWARD);
   current_speed = speed;
+  left_speed = speed;
+  right_speed = speed;
   analogWrite(M1_SPEED_PIN, speed);
   analogWrite(M2_SPEED_PIN, speed);
 }
@@ -146,6 +151,8 @@ void turn_robot(int direction) {
 void slow_down(int time) {
   for (int speed = MAX_SPEED; speed > MIN_SPEED; speed -= SPEED_DEC) {
     current_speed = speed;
+    left_speed = speed;
+    right_speed = speed;
     analogWrite(M1_SPEED_PIN, speed);
     analogWrite(M2_SPEED_PIN, speed);
     delay(time / (MAX_SPEED / SPEED_DEC));
@@ -153,11 +160,13 @@ void slow_down(int time) {
 }
 
 void slow_right(int slow_amount) {
-  analogWrite(M2_SPEED_PIN, current_speed - slow_amount);
+  right_speed -= slow_amount;
+  analogWrite(M2_SPEED_PIN, right_speed);
 }
 
 void slow_left(int slow_amount) {
-  analogWrite(M1_SPEED_PIN, current_speed - slow_amount);
+  left_speed -= slow_amount;
+  analogWrite(M1_SPEED_PIN, left_speed);
 }
 
 // Stops the motors from turning

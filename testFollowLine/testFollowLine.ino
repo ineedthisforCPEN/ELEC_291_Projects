@@ -1,3 +1,5 @@
+#include <Servo.h>
+
 // Speed constants
 #define MAX_SPEED 255
 #define MIN_SPEED 0 // not moving
@@ -18,18 +20,26 @@
 #define FORWARD 0
 #define RIGHT 1
 #define LEFT 2
+#define BACKWARDS 3
 
-#define ECHO 13
-#define TRIGGER 12
-#define TEMPERATURE A0
+#define ECHO 10         // Arduino pin to which the ultrasonic sensor's echo pin is connected
+#define TRIGGER 11      // Arduino pin to which the ultrasonic sensor's trigger pin is connected
+#define TEMPERATURE A0  // Arduino pin to which the LM35 output is connected
+#define SERVO 12        // Arduino pin to which the servo output is connected
 
-#define SENSOR_F A1
-#define SENSOR_L A2
+#define SENSOR_F A2
+#define SENSOR_L A4
 #define SENSOR_R A3
-#define BLACK_THRESHOLD 100
+#define BLACK_THRESHOLD 200
 
+#define STOP_THRESHOLD 40.00
+#define SCAN_THRESHOLD 10.00
+#define SLOW_DOWN_TIME 1000
+
+Servo scanningServo;
 bool leave = false;
 int sensorf_value, sensorl_value, sensorr_value = 0;
+int currentServoDegrees = 90;   // Servo is initially facing forwards
 int current_speed = 0;
 
 void setup() {
@@ -47,88 +57,18 @@ void setup() {
   pinMode(SENSOR_F, INPUT);
   pinMode(SENSOR_L, INPUT);
   pinMode(SENSOR_R, INPUT);
+  scanningServo.attach(SERVO);
 }
 
 void loop() {
-  if (digitalRead(PRNCP_FUNC1_PIN)) {
-    prncp_func1();
-  }
-  else if (digitalRead(PRNCP_FUNC2_PIN)) {
-    prncp_func2();
-  }
-  else if (digitalRead(ADD_FUNC_PIN)) {
-    add_func();
-  }
+  
+  
+  followLine();
+  //readSensor();
+  //move_forward(MAX_SPEED);
 }
 
-// Executes the first principle function
 
-void prncp_func1() {
-  
-}
-
-// Executes the second principle function
-
-void prncp_func2() {
-  
-}
-
-// Executes the additional function
-
-void add_func() {
-  
-}
-
-void run_tests() {
-    //Test Case 1:
-  //Move forward at MAX_SPEED for one second, then stopping for one second.
-  move_forward(MAX_SPEED);
-  delay(1000);
-  stop_motors();
-  delay(1000);
-  
-  //Test Case 2:
-  //Turn left at MAX_SPEED for one second, then stopping for one second.
-  for (int i = 0; i < 1000; i++) {
-    turn_robot(LEFT);
-  }
-  delay(1000);
-  //Test Case 3:
-  //Turn right at MAX_SPEED for one second, then stopping for one second.
-  for (int i = 0; i < 1000; i++) {
-    turn_robot(RIGHT);
-  }
-  delay(1000);
-
-
-  //Test Case 4:
-  //Only run one of the motors
-  int value;
-  for (value = 0 ; value <= 255; value += 5)
-  {
-    digitalWrite(M2_DIR_PIN, LOW);
-    //digitalWrite(M2, HIGH);
-    analogWrite(M2_SPEED_PIN, value);   //PWM Speed Control
-    //analogWrite(E2, value);   //PWM Speed Control
-    delay(30);
-  }
-
-  //Test Case 5:
-  //Move forward for maximum speed, when an object is detected to be within our threshold of 50cm, slow down the robot
-  //Robot should come to a stop in 2 seconds
-  
-  move_forward(MAX_SPEED);
-  //turn_left(2000);
-  //turn_left(150);
-
-  float dist;
-  dist = distanceFromSensor();
-  Serial.println(dist);
-  if (dist < 50.00) {
-    slow_down(2000);
-    delay(1000);
-  }
-}
 
 //------------------------------------------------------------------------------------------------------
 
@@ -145,8 +85,8 @@ void move_forward(int speed) {
 
 void turn_robot(int direction) {
   set_motors(direction);
-  analogWrite(M1_SPEED_PIN, MAX_SPEED);
-  analogWrite(M2_SPEED_PIN, MAX_SPEED);
+  analogWrite(M1_SPEED_PIN, 175);
+  analogWrite(M2_SPEED_PIN, 175);
   delay(1);
   // once turning is finished, stop motors
   stop_motors();
@@ -190,62 +130,13 @@ void set_motors(int direction) {
     digitalWrite(M1_DIR_PIN, HIGH );
     digitalWrite(M2_DIR_PIN, LOW);
   }
-  else {      // direction == LEFT
+  else if (direction == LEFT) {
     digitalWrite(M1_DIR_PIN, LOW);
     digitalWrite(M2_DIR_PIN, HIGH);
   }
 }
 
-//------------------------------------------------------------------------------------------------------
 
-/**
-   This function is meant to calculate the sound's period based on the reading from the
-   LM35 temperature sensor and lecture slides. It reads the temperature sensor value, then
-   returns the calculated period.
-
-   This function takes into account that the sound wave must travel twice the distance
-   (hence, 20000.0 is used instead of 10000.0)
-*/
-float calculatePeriod(void) {
-  long startTime = millis();                              // Get current uptime of Arduino board
-  long totalMilliVolts = 0;                               // Long for storing total millivolts (long to prevent overflow)
-  long numMeasures = 0;                                   // Long for storing number of measurements (long to prevent overflow)
-
-  while (millis() - startTime < 50) {                     // Measure for 50 milliseconds
-    totalMilliVolts += analogRead(TEMPERATURE);        // Add to total millivolts measures
-    numMeasures++;                                        // Increment measure counter
-  }
-
-  // Calculate the period, then return it
-  // Calculation gotten from lecture slides
-  // The value 0.415282392 is used instead of 500.0/1024.0 - we believe this will reduce the number of computations needed
-  // Calculation is (1000000 / 100) * (1 / (331.5 + 0.6 * Temperature))
-  // Our reduced calculation is seen below
-  return 20000.0 / (331.5 + 0.6 * (((float) totalMilliVolts) / ((float) numMeasures) * (0.415282392)));
-  /*--------------------- Temperature in C -----------------------*/
-}
-
-/**
-   This function determines how far away an object is from the sensor. The calculations
-   are based on the formula given in the lecture slides
-
-   Distance in cm = Echo pulse width (in us) / period
-*/
-float distanceFromSensor(void) {
-  // Send a start signal to the trigger pin
-  digitalWrite(TRIGGER, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(TRIGGER, LOW);
-
-  // Measure how long it takes the echo signals to return
-  unsigned long echoTime = pulseIn(ECHO, HIGH);
-
-  // Build in delay with calculatePeriod(), so we do not need to delay an extra 50ms after calling this function
-  float period = calculatePeriod();
-
-  // Return the distance (in centimeters)
-  return ((float) echoTime / period);
-}
 
 /**
    The function followLine() allows for the robot to follow a guided path using the reflective optical sensors. The sensors are attached at the front of the robot in a triangle formation.
@@ -258,20 +149,22 @@ float distanceFromSensor(void) {
 */
 
 void followLine() {
- //unless prompted to leave, the function runs on an infinite loop
- while(true) { 
-    if(leave)
-      break;
-     
+ 
+
     sensorf_value = analogRead(SENSOR_F); //read the front sensor
     
+    
     //if the front sensor detects the path, continue moving forward
-    if(sensorf_value <= BLACK_THRESHOLD)
+    if(sensorf_value > BLACK_THRESHOLD)
     {
-        move_forward(MAX_SPEED);
-        delay(500);
+        move_forward(MAX_SPEED/2);
+        delay(1);
     }
+    //else
+    //stop_motors();
 
+//}
+    
     else
     {
         sensorl_value = analogRead(SENSOR_L); //read the left sensor
@@ -279,14 +172,14 @@ void followLine() {
 
         //if the left sensor detects the path AND the right sensor does not, turn the robot to the left until the front sensor detects the path again,
         //and then continue moving forward
-        if(sensorl_value <= BLACK_THRESHOLD && sensorr_value > BLACK_THRESHOLD)
+        if(sensorl_value > BLACK_THRESHOLD && sensorr_value <= BLACK_THRESHOLD)
         {
               turn_to_check_path(LEFT);
         }
 
         //if the right sensor detects the path AND the left sensor does not, turn the robot to the right until the front sensor detects the path again,
         //and then continue moving forward
-        else if(sensorl_value > BLACK_THRESHOLD && sensorr_value <= BLACK_THRESHOLD)
+        else if(sensorl_value <= BLACK_THRESHOLD && sensorr_value > BLACK_THRESHOLD)
         {
               turn_to_check_path(RIGHT);
         }
@@ -294,8 +187,8 @@ void followLine() {
         //if neither sensor detects the path, move the robot forward a tiny bit and try again
         else if(sensorl_value <= BLACK_THRESHOLD && sensorr_value <= BLACK_THRESHOLD)
         {
-              move_forward(MAX_SPEED/2);
-              delay(20);
+              move_forward(MAX_SPEED);
+              delay(1);
         }
 
         //if both sensors detect the path, turn the robot left until the front sensor detects the path
@@ -304,7 +197,7 @@ void followLine() {
               turn_to_check_path(LEFT);
         }
     }
- }
+ 
 }
 
 //Function that turns the robot in a certain direction for 90 degrees. Stops if the front sensor detects the path
@@ -314,10 +207,32 @@ void turn_to_check_path(int direction) {
     turn_robot(direction);
     if(analogRead(SENSOR_F) > BLACK_THRESHOLD)
     {
+      //move_forward(MAX_SPEED/4);
+      //delay(10);
       break;
     }
     
+    
   }
+
+}
+
+void readSensor()
+{
+// put your main code here, to run repeatedly
+  int analogF = analogRead(SENSOR_F);
+  int analogL = analogRead(SENSOR_L);
+  int analogR = analogRead(SENSOR_R);
+  
+  //int digital = digitalRead(10);
+  
+  Serial.print(analogL);
+  Serial.print("\t\t");
+  Serial.print(analogF);
+  Serial.print("\t\t");
+  Serial.print(analogR);
+  Serial.println();
+  delay(100);
 
 }
 
