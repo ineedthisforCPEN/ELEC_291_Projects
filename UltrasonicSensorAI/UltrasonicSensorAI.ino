@@ -4,11 +4,12 @@
 #define M1_SPEED_PIN 5
 #define M2_DIR_PIN 7
 #define M2_SPEED_PIN 6
-#define ECHO 10         // Arduino pin to which the ultrasonic sensor's echo pin is connected
+#define ECHO 12         // Arduino pin to which the ultrasonic sensor's echo pin is connected
 #define TRIGGER 11      // Arduino pin to which the ultrasonic sensor's trigger pin is connected
 #define TEMPERATURE A0  // Arduino pin to which the LM35 output is connected
-#define SERVO 12        // Arduino pin to which the servo output is connected
-
+#define SERVO 10        // Arduino pin to which the servo output is connected
+#define LEFT_WHEEL A5
+#define RIGHT_WHEEL A6
 #define FORWARD 0
 #define LEFT 1
 #define RIGHT 2
@@ -21,6 +22,8 @@
 #define STOP_THRESHOLD 40.00
 #define SCAN_THRESHOLD 10.00
 #define SLOW_DOWN_TIME 1000
+#define HALL_THRESHOLD 50
+#define ROTATION_THRESHOLD 20
 
 /* Function prototupes */
 int scanEnvironment(void);
@@ -31,6 +34,8 @@ float distanceFromSensor(void);
 Servo scanningServo;
 int currentServoDegrees = 90;   // Servo is initially facing forwards
 int current_speed = 0;
+int current_left_speed = 0;
+int current_right_speed = 0;
 
 void setup() {
   // Initialize serial port - useful for debugging
@@ -48,43 +53,52 @@ void setup() {
 }
 
 void loop() {
-  int obstacleDistance;
+  //int obstacleDistance;
   int i;
 
   move_forward(MAX_SPEED);
-/*
-  obstacleDistance = distanceFromSensor();
-  if (obstacleDistance <= STOP_THRESHOLD) {
-    int turnDirection;
+
+  while (distanceFromSensor() > STOP_THRESHOLD) {
+    Serial.print(distanceFromSensor());
+    Serial.print("\t");
+    Serial.println(analogRead(A0));
+    //adjustCourse(0);
+  }
+
+  if (distanceFromSensor() <= STOP_THRESHOLD) {
     
-    // Slow down if an object is detected and come to a stop
-    slow_down(SLOW_DOWN_TIME);
-    Serial.println("STOPPED");
-    delay(500);
-    
-    // Scan the surroundings and take appropriate action
-    turnDirection = scanEnvironment();
-    switch(turnDirection) {
-      case LEFT:
-        for (i = 0; i < 300; i++) {
-          turn_robot(LEFT);
-        }
-        Serial.println("TURNING LEFT");
-        break;
-      case RIGHT:
-        for (i = 0; i < 300; i++) {
-          turn_robot(RIGHT);
-        }
-        Serial.println("TURNING RIGHT");
-        break;
-      case BACKWARDS:
-        // Default case is to go backwards
-      default:
-        //goBackwardsFunction();
-        Serial.println("GOING BACKWARDS");
-        break;
+  int turnDirection;
+  
+  // Slow down if an object is detected and come to a stop
+  slow_down(SLOW_DOWN_TIME /* ((int) distanceFromSensor() / STOP_THRESHOLD)*/);
+  
+  // Scan the surroundings and take appropriate action
+  turnDirection = scanEnvironment();
+  switch(turnDirection) {
+    case LEFT:
+      for (i = 0; i < 300; i++) {
+        turn_robot(LEFT, MAX_SPEED);
+      }
+      Serial.println("TURNING LEFT");
+      break;
+    case RIGHT:
+      for (i = 0; i < 300; i++) {
+        turn_robot(RIGHT, MAX_SPEED);
+      }
+      Serial.println("TURNING RIGHT");
+      break;
+    case BACKWARDS:
+      // Default case is to go backwards
+    default:
+      set_motors(BACKWARDS);
+      analogWrite(M1_SPEED_PIN, MAX_SPEED);
+      analogWrite(M2_SPEED_PIN, MAX_SPEED);
+      delay(1000);
+      stop_motors();
+      Serial.println("GOING BACKWARDS");
+      break;
     }
-  }*/
+  }
 }
 
 //------------------------------------------------
@@ -154,6 +168,69 @@ int scanEnvironment(void) {
 }
 
 //------------------------------------------------
+// FUNCTION FOR ADJUSTING COURSE
+//------------------------------------------------
+
+void adjustCourse(int currentSpeedVoltage) {
+  // Make sure the parameter is within a valid range (i.e. between 0 and 255 inclusive)
+  if (currentSpeedVoltage < 0) currentSpeedVoltage = 0;
+  else if (currentSpeedVoltage > 255) currentSpeedVoltage = 255;
+  
+  long start_left = 0;  // Used to measure period of left wheel
+  long start_right = 0; // Used to measure period of right wheel
+  long period_left = 0;
+  long period_right = 0;
+
+  int left_measure;
+  int right_measure;
+
+  while (true) {
+    left_measure = analogRead(LEFT_WHEEL);
+    right_measure = analogRead(RIGHT_WHEEL);
+
+    //Serial.print(left_measure);
+    //Serial.print("\t");
+    //Serial.println(right_measure);
+
+    if (start_left   == 0 && left_measure  < HALL_THRESHOLD) start_left   = millis();
+    if (start_right  == 0 && right_measure < HALL_THRESHOLD) start_right  = millis();
+    
+    // NOTE: 200 is used below because the fastest possible period is 450 milliseconds (200 is less than 450),
+    // yet the wheel can spin enough in 200 milliseconds to pass the hall effect sensor wihtout being read
+    // twice before completing a full revolution
+    if (period_left  == 0 && left_measure  < HALL_THRESHOLD && millis() - start_left  > 200)
+      period_left  = millis() - start_left;
+    if (period_right == 0 && right_measure < HALL_THRESHOLD && millis() - start_right > 200)
+      period_right = millis() - start_right;
+
+    // If both periods have been measured, leave this while loop
+    if (period_left != 0 && period_right != 0){
+      //Serial.print("start_left:\t");
+      //Serial.println(start_left);
+      //Serial.print("start_right:\t");
+      //Serial.println(start_right);
+      if(abs(period_left-period_right) <=ROTATION_THRESHOLD){
+        return;
+      }
+      while(period_left> period_right){
+        period_left -= 10;
+        Serial.println("Slowing right");
+        slow_right(22);
+      }
+      while(period_right >period_left){
+        period_right -= 10;
+      Serial.println("Slowing left");
+        slow_left(22);
+      }
+      if (current_left_speed < 200 || current_right_speed <200){
+        move_forward(MAX_SPEED);
+      }
+      break;
+    }
+  }
+}
+
+//------------------------------------------------
 // FUNCTIONS FOR MEASURING DISTANCE
 //------------------------------------------------
 
@@ -203,26 +280,34 @@ float distanceFromSensor(void) {
   float period = calculatePeriod();
 
   // Return the distance (in centimeters)
-  return ((float) echoTime / period);
+  float distance = (float) echoTime / period;
+
+  if (distance > 1000) {
+    return 200.0;
+  }
+  return distance;
 }
 
 //------------------------------------------------
 // FUNCTIONS FOR ADJUSTING THE MOTORS
 //------------------------------------------------
 
+// Move robot forward at a given speed
+
 void move_forward(int speed) {
   set_motors(FORWARD);
-  current_speed = speed;
+  current_left_speed = speed;
+  current_right_speed = speed;
   analogWrite(M1_SPEED_PIN, speed);
   analogWrite(M2_SPEED_PIN, speed);
 }
 
 // Turn robot from forward direction towards input direction for 1 ms
 
-void turn_robot(int direction) {
+void turn_robot(int direction, int turn_speed) {
   set_motors(direction);
-  analogWrite(M1_SPEED_PIN, MAX_SPEED);
-  analogWrite(M2_SPEED_PIN, MAX_SPEED);
+  analogWrite(M1_SPEED_PIN, turn_speed);
+  analogWrite(M2_SPEED_PIN, turn_speed);
   delay(1);
   // once turning is finished, stop motors
   stop_motors();
@@ -233,10 +318,70 @@ void turn_robot(int direction) {
 
 void slow_down(int time) {
   for (int speed = MAX_SPEED; speed > MIN_SPEED; speed -= SPEED_DEC) {
-    current_speed = speed;
+    current_left_speed = speed;
+    current_right_speed = speed;
     analogWrite(M1_SPEED_PIN, speed);
     analogWrite(M2_SPEED_PIN, speed);
     delay(time / (MAX_SPEED / SPEED_DEC));
+  }
+}
+
+void speedup_motor(int motor, int amount) {
+
+  int desired_speed;
+  if (motor == RIGHT) {
+    desired_speed = current_right_speed + amount;
+    if (desired_speed > MAX_SPEED) {
+      analogWrite(M2_SPEED_PIN, MAX_SPEED);
+      current_right_speed = MAX_SPEED;
+    }
+    else {
+      analogWrite(M2_SPEED_PIN, desired_speed);
+      current_right_speed = desired_speed;
+    }
+  }
+  
+  else if (motor == LEFT) {
+    desired_speed = current_left_speed + amount;
+    if (desired_speed > MAX_SPEED) {
+      analogWrite(M1_SPEED_PIN, MAX_SPEED);
+      current_left_speed = MAX_SPEED;
+    }
+    else {
+      analogWrite(M1_SPEED_PIN, desired_speed);
+      current_left_speed = desired_speed;
+    }
+  }
+   
+}
+
+// Slows down the motor (RIGHT or LEFT) by a given amount.
+
+void slowdown_motor(int motor, int amount) {
+
+  int desired_speed;
+  if (motor == RIGHT) {
+    desired_speed = current_right_speed - amount;
+    if (desired_speed < MIN_SPEED) {
+      analogWrite(M2_SPEED_PIN, MIN_SPEED);
+      current_right_speed = MIN_SPEED;
+    }
+    else {
+      analogWrite(M2_SPEED_PIN, desired_speed);
+      current_right_speed = desired_speed;
+    }
+  }
+  
+  else if (motor == LEFT) {
+    desired_speed = current_left_speed - amount;
+    if (desired_speed < MIN_SPEED) {
+      analogWrite(M1_SPEED_PIN, MIN_SPEED);
+      current_left_speed = MIN_SPEED;
+    }
+    else {
+      analogWrite(M1_SPEED_PIN, desired_speed);
+      current_left_speed = desired_speed;
+    }
   }
 }
 
@@ -254,16 +399,22 @@ void set_motors(int direction) {
     digitalWrite(M1_DIR_PIN, HIGH);
     digitalWrite(M2_DIR_PIN, HIGH);
   }
-  else if (direction == BACKWARDS) {
-    digitalWrite(M1_DIR_PIN, LOW);
-    digitalWrite(M2_DIR_PIN, LOW);
-  }
   else if (direction == RIGHT) {
     digitalWrite(M1_DIR_PIN, HIGH );
     digitalWrite(M2_DIR_PIN, LOW);
   }
-  else {      // direction == LEFT
+  else if (direction == LEFT) {
     digitalWrite(M1_DIR_PIN, LOW);
     digitalWrite(M2_DIR_PIN, HIGH);
   }
+}
+
+void slow_right(int slow_amount) {
+  analogWrite(M2_SPEED_PIN, current_right_speed - slow_amount);
+  current_right_speed -= slow_amount;
+}
+
+void slow_left(int slow_amount) {
+  analogWrite(M1_SPEED_PIN, current_left_speed - slow_amount);
+  current_left_speed -= slow_amount;
 }
