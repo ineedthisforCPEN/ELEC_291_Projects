@@ -124,6 +124,7 @@ void loop() {
 
 void prncp_func1() {
   move_forward(MAX_SPEED);
+  scanningServo.write(90);
 
   while (distanceFromSensor() > STOP_THRESHOLD) {
     Serial.print(distanceFromSensor());
