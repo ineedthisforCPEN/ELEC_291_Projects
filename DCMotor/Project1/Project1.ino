@@ -68,8 +68,8 @@
 Servo scanningServo;
 int sensorf_value, sensorl_value, sensorr_value = 0;
 int currentServoDegrees = 90;   // Servo is initially facing forwards
-int current_left_speed = 0;
-int current_right_speed = 0;
+int current_left_speed = MAX_SPEED;
+int current_right_speed = MAX_SPEED;
 
 int SIZE_IN = 5;
 int SIZE_OUT = 3;
