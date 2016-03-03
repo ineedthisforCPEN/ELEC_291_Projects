@@ -45,7 +45,7 @@
 #define SLOW_DOWN_TIME      1000  // How many milliseconds it will take for the robot to slow down (F1)
 #define F1_TURN_TIME        300   // How many milliseconds the robot will turn (F1)
 #define HALL_THRESHOLD      50    // Below this value means a magnet is detected (F1)
-#define ADJUST_THRESHOLD    200   // Threshold for adjusting the current speed of the motors - above = decrease, below = increase (F1)
+#define ADJUST_THRESHOLD    240   // Threshold for adjusting the current speed of the motors - above = decrease, below = increase (F1)
 
 // Robot directions (i.e. enumerating directions)
 #define FORWARD   0
@@ -212,8 +212,11 @@ void turn_robot(int direction, int turn_speed) {
   stop_motors();                            // Once turning is finished, stop motors
 }
 
-/*
+
+/* 
+ * Slows down robot from MIN_SPEED to MAX_SPEED for a specified duration.  
  * 
+ * Param: time - duration over which robot speeds up (in ms)
  */
 
 void speed_up(int time) {
@@ -520,11 +523,6 @@ void adjustCourse() {
   int left_measure;
   int right_measure;
 
-  Serial.print("Left measure:\t");
-  Serial.print(left_measure);
-  Serial.print("\t\tRight measure:\t");
-  Serial.println(right_measure);
-
   while (true) {
     left_measure = analogRead(LEFT_WHEEL);
     right_measure = analogRead(RIGHT_WHEEL);
@@ -549,35 +547,35 @@ void adjustCourse() {
     if (period_left != 0 && period_right != 0) {
 
       // if both wheels are going a bit too slow...
-      if ((current_left_speed < ADJUST_THRESHOLD) && (current_right_speed < ADJUST_THRESHOLD)) {
+      if ((current_left_speed < ADJUST_THRESHOLD) || (current_right_speed < ADJUST_THRESHOLD)) {
 
         // left wheel is slower?
         if (period_left > period_right) {
           //speedup values were empirically determined
-          if (period_diff > 200)
-            speedup_motor(LEFT, 17);
-          else if (period_diff > 150)
-            speedup_motor(LEFT, 14);
-          else if (period_diff > 100)
-            speedup_motor(LEFT, 11);
-          else if (period_diff > 50)
-            speedup_motor(LEFT, 8);
-          else if (period_diff > 5)
+          if (period_diff > 83)
+            speedup_motor(LEFT, 25);
+          else if (period_diff > 63)
+            speedup_motor(LEFT, 20);
+          else if (period_diff > 43)
+            speedup_motor(LEFT, 15);
+          else if (period_diff > 23)
+            speedup_motor(LEFT, 10);
+          else if (period_diff > 3)
             speedup_motor(LEFT, 5);
         }
         
         // right wheel is slower
         else {
-          if (period_diff > 200)
-            speedup_motor(RIGHT, 17);
-          else if (period_diff > 150)
+          if (period_diff > 83)
             speedup_motor(RIGHT, 14);
-          else if (period_diff > 100)
+          else if (period_diff > 63)
             speedup_motor(RIGHT, 11);
-          else if (period_diff > 50)
+          else if (period_diff > 43)
             speedup_motor(RIGHT, 8);
-          else if (period_diff > 5)
+          else if (period_diff > 23)
             speedup_motor(RIGHT, 5);
+          else if (period_diff > 3)
+            speedup_motor(RIGHT, 2);
         }
       }
 
@@ -588,30 +586,30 @@ void adjustCourse() {
         if (period_left > period_right) {
           
           //slowdown values were empirically determined
-          if (period_diff > 200)
-            slowdown_motor(RIGHT, 17);
-          else if (period_diff > 150)
-            slowdown_motor(RIGHT, 14);
-          else if (period_diff > 100)
-            slowdown_motor(RIGHT, 11);
-          else if (period_diff > 50)
+          if (period_diff > 83)
+            slowdown_motor(RIGHT, 28);
+          else if (period_diff > 63)
+            slowdown_motor(RIGHT, 23);
+          else if (period_diff > 43)
+            slowdown_motor(RIGHT, 18);
+          else if (period_diff > 23)
+            slowdown_motor(RIGHT, 13);
+          else if (period_diff > 3)
             slowdown_motor(RIGHT, 8);
-          else if (period_diff > 5)
-            slowdown_motor(RIGHT, 5);
         }
         
         // right wheel is slower
         else {
-          if (period_diff > 200)
-            slowdown_motor(LEFT, 17);
-          else if (period_diff > 150)
+          if (period_diff > 83)
             slowdown_motor(LEFT, 14);
-          else if (period_diff > 100)
+          else if (period_diff > 63)
             slowdown_motor(LEFT, 11);
-          else if (period_diff > 50)
+          else if (period_diff > 43)
             slowdown_motor(LEFT, 8);
-          else if (period_diff > 5)
+          else if (period_diff > 23)
             slowdown_motor(LEFT, 5);
+          else if (period_diff > 3)
+            slowdown_motor(LEFT, 2);
         }
       }
     }
