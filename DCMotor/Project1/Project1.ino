@@ -129,7 +129,9 @@ void prncp_func1() {
     int i;
   
     // Slow down if an object is detected and come to a stop
-    slow_down(SLOW_DOWN_TIME);
+    // Slow down time is proporitional to distance from obstacle
+    //    This assumes that slow down time is linearly proporitional to distance from obstacle
+    slow_down(SLOW_DOWN_TIME * ((int) (distanceFromSensor() / 45.0)));
   
     // Scan the surroundings and take appropriate action
     turnDirection = scanEnvironment();
