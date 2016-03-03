@@ -66,8 +66,7 @@
 // GLOBAL VARIABLES
 //--------------------------------------
 
-Servo scanningServo;
-bool leave = false;
+Servo scanningServo;git
 int sensorf_value, sensorl_value, sensorr_value = 0;
 int currentServoDegrees = 90;   // Servo is initially facing forwards
 int current_left_speed = 0;
@@ -123,8 +122,8 @@ void loop() {
 // Executes the first principle function
 
 void prncp_func1() {
-  move_forward(MAX_SPEED);
   scanningServo.write(90);
+  move_forward(MAX_SPEED);
 
   while (distanceFromSensor() > STOP_THRESHOLD) {
     Serial.print(distanceFromSensor());
