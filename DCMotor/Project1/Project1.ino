@@ -67,6 +67,7 @@ int sensorf_value, sensorl_value, sensorr_value = 0;
 int currentServoDegrees = 90;   // Servo is initially facing forwards
 int current_left_speed = MAX_SPEED;
 int current_right_speed = MAX_SPEED;
+int accelerateFlag = 1;
 
 int SIZE_IN = 5;
 int SIZE_OUT = 3;
@@ -128,7 +129,10 @@ void prncp_func1() {
   //Serial.print("\t");
   //Serial.println(current_right_speed);
 
-  if (current_left_speed < 125 || current_right_speed < 125) {
+  if (accelerateFlag == 1) {
+    speed_up(1000);
+    accelerateFlae = 0;
+  } else if (current_left_speed < 125 || current_right_speed < 125) {
     // If the voltage across the wheels is too low, the robot will not move
     // This ensures there is enough voltage applies across the motor terminals so the robot will move
     current_left_speed = MAX_SPEED;
@@ -152,6 +156,7 @@ void prncp_func1() {
 
   // If an object is detected, take the appropriate action
   if (distanceFromSensor() <= STOP_THRESHOLD) {
+    accelerateFlag = 1;
     float distance = distanceFromSensor();
 
     // This prevents any fluctuations in the ultrasonic sensor from causing problems
