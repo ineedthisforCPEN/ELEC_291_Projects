@@ -133,9 +133,8 @@ void prncp_func1() {
         return;
     }
     //adjustCourse(0);
+    */
   }
-
-  */
   if (distanceFromSensor() <= STOP_THRESHOLD) {
     int turnDirection;
     int i;
