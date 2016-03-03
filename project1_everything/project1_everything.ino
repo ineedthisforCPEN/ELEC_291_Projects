@@ -34,8 +34,8 @@
 
 // Speed constants
 #define MAX_SPEED   255   // Maximum speed (maximum voltage that can be applied to the motors)
-#define MIN_SPEED   0     // Not moving
-#define SPEED_DEC   5     // Decrement value for speed (when slowing down)
+#define MIN_SPEED     0   // Not moving
+#define SPEED_DELTA   5   // Increment (decrement) speed value for speeding up (slowing down)
 #define TURN_SPEED  175   // The speed of the robot when turning
 
 // Threshold values
@@ -129,10 +129,10 @@ void prncp_func1() {
   if (current_left_speed < 125 || current_right_speed < 125) {
     // If the voltage across the wheels is too low, the robot will not move
     // This ensures there is enough voltage applies across the motor terminals so the robot will move
-    current_left_speed = 255;
-    current_right_speed = 255;
-    analogWrite(M1_SPEED_PIN, 255);//current_left_speed);
-    analogWrite(M2_SPEED_PIN, 255);//current_right_speed);
+    current_left_speed = MAX_SPEED;
+    current_right_speed = MAX_SPEED;
+    analogWrite(M1_SPEED_PIN, MAX_SPEED);//current_left_speed);
+    analogWrite(M2_SPEED_PIN, MAX_SPEED);//current_right_speed);
   } else {
     analogWrite(M1_SPEED_PIN, current_left_speed);
     analogWrite(M2_SPEED_PIN, current_right_speed);
@@ -234,18 +234,34 @@ void turn_robot(int direction, int turn_speed) {
 }
 
 /* 
+ * Slows down robot from MIN_SPEED to MAX_SPEED for a specified duration.  
+ * 
+ * Param: time - duration over which robot speeds up (in ms)
+ */
+
+void speed_up(int time) {
+  for (int speed = MIN_SPEED; speed < MAX_SPEED; speed += SPEED_DELTA) {
+    current_left_speed = speed;
+    current_right_speed = speed;
+    analogWrite(M1_SPEED_PIN, speed);
+    analogWrite(M2_SPEED_PIN, speed);
+    delay(time / (MAX_SPEED / SPEED_DELTA));
+  }  
+}
+
+/* 
  * Slows down robot from MAX_SPEED to MIN_SPEED for a specified duration.  
  * 
  * Param: time - duration over which robot slows down (in ms)
  */
 
 void slow_down(int time) {
-  for (int speed = MAX_SPEED; speed > MIN_SPEED; speed -= SPEED_DEC) {
+  for (int speed = MAX_SPEED; speed > MIN_SPEED; speed -= SPEED_DELTA) {
     current_left_speed = speed;
     current_right_speed = speed;
     analogWrite(M1_SPEED_PIN, speed);
     analogWrite(M2_SPEED_PIN, speed);
-    delay(time / (MAX_SPEED / SPEED_DEC));
+    delay(time / (MAX_SPEED / SPEED_DELTA));
   }
 }
 
@@ -465,30 +481,30 @@ void adjustCourse() {
         // left wheel is slower?
         if (period_left > period_right) {
           //speedup values were empirically determined
-          if (period_diff > 200)
-            speedup_motor(LEFT, 17);
-          else if (period_diff > 150)
-            speedup_motor(LEFT, 14);
-          else if (period_diff > 100)
-            speedup_motor(LEFT, 11);
-          else if (period_diff > 50)
-            speedup_motor(LEFT, 8);
-          else if (period_diff > 5)
+          if (period_diff > 83)
+            speedup_motor(LEFT, 25);
+          else if (period_diff > 63)
+            speedup_motor(LEFT, 20);
+          else if (period_diff > 43)
+            speedup_motor(LEFT, 15);
+          else if (period_diff > 23)
+            speedup_motor(LEFT, 10);
+          else if (period_diff > 3)
             speedup_motor(LEFT, 5);
         }
         
         // right wheel is slower
         else {
-          if (period_diff > 200)
-            speedup_motor(RIGHT, 17);
-          else if (period_diff > 150)
+          if (period_diff > 83)
             speedup_motor(RIGHT, 14);
-          else if (period_diff > 100)
+          else if (period_diff > 63)
             speedup_motor(RIGHT, 11);
-          else if (period_diff > 50)
+          else if (period_diff > 43)
             speedup_motor(RIGHT, 8);
-          else if (period_diff > 5)
+          else if (period_diff > 23)
             speedup_motor(RIGHT, 5);
+          else if (period_diff > 3)
+            speedup_motor(RIGHT, 2);
         }
       }
 
@@ -499,30 +515,30 @@ void adjustCourse() {
         if (period_left > period_right) {
           
           //slowdown values were empirically determined
-          if (period_diff > 200)
-            slowdown_motor(RIGHT, 17);
-          else if (period_diff > 150)
-            slowdown_motor(RIGHT, 14);
-          else if (period_diff > 100)
-            slowdown_motor(RIGHT, 11);
-          else if (period_diff > 50)
+          if (period_diff > 83)
+            slowdown_motor(RIGHT, 28);
+          else if (period_diff > 63)
+            slowdown_motor(RIGHT, 23);
+          else if (period_diff > 43)
+            slowdown_motor(RIGHT, 18);
+          else if (period_diff > 23)
+            slowdown_motor(RIGHT, 13);
+          else if (period_diff > 3)
             slowdown_motor(RIGHT, 8);
-          else if (period_diff > 5)
-            slowdown_motor(RIGHT, 5);
         }
         
         // right wheel is slower
         else {
-          if (period_diff > 200)
-            slowdown_motor(LEFT, 17);
-          else if (period_diff > 150)
+          if (period_diff > 83)
             slowdown_motor(LEFT, 14);
-          else if (period_diff > 100)
+          else if (period_diff > 63)
             slowdown_motor(LEFT, 11);
-          else if (period_diff > 50)
+          else if (period_diff > 43)
             slowdown_motor(LEFT, 8);
-          else if (period_diff > 5)
+          else if (period_diff > 23)
             slowdown_motor(LEFT, 5);
+          else if (period_diff > 3)
+            slowdown_motor(LEFT, 2);
         }
       }
     }
