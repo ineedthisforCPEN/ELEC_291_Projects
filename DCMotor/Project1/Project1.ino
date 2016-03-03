@@ -134,6 +134,7 @@ void prncp_func1() {
     }
     //adjustCourse(0);
     */
+    move_forward(MAX_SPEED);  // Testing prncp_func1()
   }
   if (distanceFromSensor() <= STOP_THRESHOLD) {
     int turnDirection;
