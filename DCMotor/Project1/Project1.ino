@@ -131,7 +131,7 @@ void prncp_func1() {
 
   if (accelerateFlag == 1) {
     speed_up(1000);
-    accelerateFlae = 0;
+    accelerateFlag = 0;
   } else if (current_left_speed < 125 || current_right_speed < 125) {
     // If the voltage across the wheels is too low, the robot will not move
     // This ensures there is enough voltage applies across the motor terminals so the robot will move
