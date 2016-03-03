@@ -125,28 +125,42 @@ void prncp_func1() {
     Serial.print(distanceFromSensor());
     Serial.print("\t");
     Serial.println(analogRead(A0));
+    if(digitalRead(SWITCH_FUNC_PIN) == HIGH)
+    {
+        return;
+    }
     //adjustCourse(0);
   }
-
   if (distanceFromSensor() <= STOP_THRESHOLD) {
     int turnDirection;
     int i;
   
     // Slow down if an object is detected and come to a stop
     slow_down(SLOW_DOWN_TIME);
-  
+    if(digitalRead(SWITCH_FUNC_PIN) == HIGH)
+    {
+      return;
+    }
     // Scan the surroundings and take appropriate action
     turnDirection = scanEnvironment();
     switch(turnDirection) {
       case LEFT:
         for (i = 0; i < F1_TURN_TIME; i++) {
           turn_robot(LEFT, TURN_SPEED);
+          if(digitalRead(SWITCH_FUNC_PIN) == HIGH)
+          {
+            return;
+          }
         }
         Serial.println("TURNING LEFT");
         break;
       case RIGHT:
         for (i = 0; i < F1_TURN_TIME; i++) {
           turn_robot(RIGHT, TURN_SPEED);
+          if(digitalRead(SWITCH_FUNC_PIN) == HIGH)
+          {
+            return;
+          }
         }
         Serial.println("TURNING RIGHT");
         break;
@@ -157,10 +171,19 @@ void prncp_func1() {
         analogWrite(M1_SPEED_PIN, MAX_SPEED);
         analogWrite(M2_SPEED_PIN, MAX_SPEED);
         delay(1000);
+        if(digitalRead(SWITCH_FUNC_PIN) == HIGH)
+        {
+          return;
+        }
         stop_motors();
         Serial.println("GOING BACKWARDS");
         break;
     }
+
+    if(digitalRead(SWITCH_FUNC_PIN) == HIGH)
+      {
+        return;
+      }
   }
 }
 
