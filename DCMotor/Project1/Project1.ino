@@ -21,13 +21,13 @@
 #define RIGHT_WHEEL   A5  // Hall effect sensor on right side
 
 // Arduino analog pins used for the optical sensors
-#define SENSOR_F A1
+#define SENSOR_F A3
 #define SENSOR_L A2
-#define SENSOR_R A3
+#define SENSOR_R A1
 
-// Arduino digital pins corresponding to the robot's functionalities
-#define SWITCH_A_PIN 2
-#define SWITCH_B_PIN 3
+// Arduino digital pin corresponding to the robot's functionalities
+#define SWITCH_FUNC_PIN 2
+
 
 //--------------------------------------
 // CONSTANT DEFINITIONS
@@ -75,24 +75,22 @@ int current_right_speed = 0;
 
 int switch_A_status;
 int switch_B_status;
-
-int inputPins[]  = {SWITCH_A_PIN, SWITCH_B_PIN,
-                    ECHO,
-                    SENSOR_F, SENSOR_L, SENSOR_R}
-int outputPins[] = {M1_DIR_PIN, M2_DIR_PIN
-                    TRIGGER, TEMPERATURE}
+int SIZE_IN = 5;
+int SIZE_OUT = 4;
+int inputPins[]  = {ECHO, SENSOR_F, SENSOR_L, SENSOR_R, SWITCH_FUNC_PIN};
+int outputPins[] = {M1_DIR_PIN, M2_DIR_PIN, TRIGGER, TEMPERATURE};
 
 void setup() {
   int i;  // Counter variable used for initializing pins later in the setup() function
   Serial.begin(9600);
 
   // Initialize input pins
-  for (i = 0; i < sizeof(inputPins); i++) {
+  for (i = 0; i < SIZE_IN; i++) {
     pinMode(inputPins[i], INPUT);
   }
 
   // Initialize output pins
-  for (i = 0; i < sizeof(outputPins); i++) {
+  for (i = 0; i < SIZE_OUT; i++) {
     pinMode(outputPins[i], OUTPUT);
   }
 
@@ -105,24 +103,16 @@ void setup() {
 
 void loop() {
 
-  move_forward(MAX_SPEED);
-  /*
-  switch_A_status = digitalRead(SWITCH_A_PIN);
-  switch_B_status = digitalRead(SWITCH_B_PIN);
-  
-  if (switch_A_status == ON && switch_B_status == OFF) {
+  if(digitalRead(SWITCH_FUNC_PIN) != HIGH)
+  {
     prncp_func1();
   }
-  else if (switch_A_status == OFF && switch_B_status == ON) {
-    prncp_func2();
+
+  else
+  {
+    followLine();
   }
-  else if (switch_A_status == ON && switch_B_status == ON) {
-    extra_func();
-  }
-  else {
-    stop_motors();
-  }
-  */
+ 
 }
 
 // Executes the first principle function
@@ -148,13 +138,13 @@ void prncp_func1() {
     turnDirection = scanEnvironment();
     switch(turnDirection) {
       case LEFT:
-        for (i = 0; i < TURN_TIME; i++) {
+        for (i = 0; i < F1_TURN_TIME; i++) {
           turn_robot(LEFT, TURN_SPEED);
         }
         Serial.println("TURNING LEFT");
         break;
       case RIGHT:
-        for (i = 0; i < TURN_TIME; i++) {
+        for (i = 0; i < F1_TURN_TIME; i++) {
           turn_robot(RIGHT, TURN_SPEED);
         }
         Serial.println("TURNING RIGHT");
@@ -175,9 +165,7 @@ void prncp_func1() {
 
 // Executes the second principle function
 
-void prncp_func2() {
-  followLine(); 
-}
+
 
 // Executes the extra function
 
@@ -430,7 +418,7 @@ void followLine() {
 void turn_to_check_path(int direction) {
   for(int i = 0; i <= 150; i++)
   {
-    turn_robot(direction, FUNC2_TURN_SPEED);
+    turn_robot(direction, TURN_SPEED);
     if(analogRead(SENSOR_F) > BLACK_THRESHOLD)
     {
       break;
