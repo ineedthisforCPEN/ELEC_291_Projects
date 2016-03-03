@@ -67,7 +67,6 @@
 //--------------------------------------
 
 Servo scanningServo;
-bool leave = false;
 int sensorf_value, sensorl_value, sensorr_value = 0;
 int currentServoDegrees = 90;   // Servo is initially facing forwards
 int current_left_speed = 0;
