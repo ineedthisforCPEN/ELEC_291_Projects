@@ -41,7 +41,7 @@
 
 // Threshold values
 #define BLACK_THRESHOLD     500   // Threshold for optical sensor - below this value means sensor is reading black (F2)
-#define STOP_THRESHOLD      40.00 // Below this value and the robot starts slowing down (F1)
+#define STOP_THRESHOLD      45.00 // Below this value and the robot starts slowing down (F1)
 #define SCAN_THRESHOLD      10.00 // Below this value and the robot will definitely not turn in this direction (F1)
 #define SLOW_DOWN_TIME      1000  // How many milliseconds it will take for the robot to slow down (F1)
 #define F1_TURN_TIME        300   // How many milliseconds the robot will turn (F1)
@@ -122,19 +122,20 @@ void loop() {
 // Executes the first principle function
 
 void prncp_func1() {
-  move_forward(MAX_SPEED);
   scanningServo.write(90);
+  move_forward(MAX_SPEED);
 
   while (distanceFromSensor() > STOP_THRESHOLD) {
+    /*  
     Serial.print(distanceFromSensor());
-    Serial.print("\t");
-    Serial.println(analogRead(A0));
     if(digitalRead(SWITCH_FUNC_PIN) == HIGH)
     {
         return;
     }
     //adjustCourse(0);
   }
+
+  */
   if (distanceFromSensor() <= STOP_THRESHOLD) {
     int turnDirection;
     int i;
@@ -142,7 +143,7 @@ void prncp_func1() {
     // Slow down if an object is detected and come to a stop
     // Slow down time is proporitional to distance from obstacle
     //    This assumes that slow down time is linearly proporitional to distance from obstacle
-    slow_down(SLOW_DOWN_TIME * ((int) (distanceFromSensor() / 45.0)));
+    slow_down(SLOW_DOWN_TIME * ((int) (distanceFromSensor() / STOP_THRESHOLD)));
   
     if(digitalRead(SWITCH_FUNC_PIN) == HIGH)
     {
