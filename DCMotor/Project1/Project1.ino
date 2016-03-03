@@ -17,8 +17,8 @@
 #define SERVO         10  // Arduino pin to which the servo output is connected
 
 // Arduino analog pins used for the hall effect sensors
-#define LEFT_WHEEL    A5  // Hall effect sensor on left side
-#define RIGHT_WHEEL   A6  // Hall effect sensor on right side
+#define LEFT_WHEEL    A4  // Hall effect sensor on left side
+#define RIGHT_WHEEL   A5  // Hall effect sensor on right side
 
 // Arduino analog pins used for the optical sensors
 #define SENSOR_F A1
