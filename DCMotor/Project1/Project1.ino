@@ -49,9 +49,9 @@
 #define ROTATION_THRESHOLD  20    // How many milliseconds of difference between wheel periods is acceptable (F1)
 
 // Robot directions (i.e. enumerating directions)
-#define FORWARD 0
-#define RIGHT 1
-#define LEFT 2
+#define FORWARD   0
+#define RIGHT     1
+#define LEFT      2
 #define BACKWARDS 3
 
 // Other constants
@@ -108,6 +108,7 @@ void loop() {
 
   else
   {
+
     prncp_func1();
   }
  */
@@ -115,7 +116,8 @@ void loop() {
   //Serial.println(digitalRead(SWITCH_FUNC_PIN));
   //delay(100);
   //followLine();
-  prncp_func1();
+  //prncp_func1();
+ 
 }
 
 // Executes the first principle function
@@ -200,7 +202,7 @@ void prncp_func1() {
 /*
  * Moves the robot forward at a given speed
  * 
- * Param: speed - the speed to set both motors
+ * Param: speed - the speed to set both motors (values ranging from MIN_SPEED to MAX_SPEED)
  */
 void move_forward(int speed) {
   set_motors(FORWARD);              // Ensure motors are set up to move forwards
@@ -224,8 +226,11 @@ void turn_robot(int direction, int turn_speed) {
   stop_motors();                            // Once turning is finished, stop motors
 }
 
-// Slow down robot from MAX_SPEED to MIN_SPEED
-// time (ms) specifies duration over which robot slows down
+/* 
+ * Slows down robot from MAX_SPEED to MIN_SPEED for a specified duration.  
+ * 
+ * Param: time - duration over which robot slows down (in ms)
+ */
 
 void slow_down(int time) {
   for (int speed = MAX_SPEED; speed > MIN_SPEED; speed -= SPEED_DEC) {
