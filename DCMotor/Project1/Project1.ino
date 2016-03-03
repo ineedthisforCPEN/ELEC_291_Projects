@@ -1,3 +1,4 @@
+#include <LiquidCrystal.h>
 #include <Servo.h>
 
 //--------------------------------------
@@ -27,6 +28,14 @@
 // Arduino digital pin corresponding to the robot's functionalities
 #define SWITCH_FUNC_PIN 9
 
+// Arduino digital pins used for the LC display
+#define RS_pin      0   
+#define Enable_pin  1
+#define D4          2
+#define D5          3
+#define D6          8 
+#define D7          13
+
 
 //--------------------------------------
 // CONSTANT DEFINITIONS
@@ -35,7 +44,7 @@
 // Speed constants
 #define MAX_SPEED   255   // Maximum speed (maximum voltage that can be applied to the motors)
 #define MIN_SPEED   0     // Not moving
-#define SPEED_DELTA 5     // Decrement (increment) value for slowing down (speeding up) robot
+#define SPEED_DELTA   5     // Decrement value for speed (when slowing down)
 #define TURN_SPEED  175   // The speed of the robot when turning
 
 // Threshold values
@@ -76,9 +85,18 @@ int SIZE_OUT = 3;
 int inputPins[]  = {ECHO, SENSOR_F, SENSOR_L, SENSOR_R, SWITCH_FUNC_PIN};
 int outputPins[] = {M1_DIR_PIN, M2_DIR_PIN, TRIGGER};
 
+// initialize the library with the number of the interface pins for the LCD
+LiquidCrystal lcd(RS_pin, Enable_pin, D4, D5, D6, D7);
+
+//displaying the speed
+
+
 void setup() {
   int i;  // Counter variable used for initializing pins later in the setup() function
   Serial.begin(9600);
+  
+  // set up the LCD's number of columns and rows:
+  lcd.begin(16, 2);
 
   // Initialize input pins
   for (i = 0; i < SIZE_IN; i++) {
@@ -98,24 +116,29 @@ void setup() {
 }
 
 void loop() {
-/*
   if(digitalRead(SWITCH_FUNC_PIN) != HIGH)
   {
-   followLine();
+   lcd.clear();
+   lcd.print("Func 1: Avoid Objects");
+   prncp_func1();
+   
   }
 
   else
   {
-
-    prncp_func1();
+    lcd.clear();
+    lcd.print("Func 1: Follow Line");
+    followLine();
   }
- */
+ 
+  //move_forward(MAX_SPEED);
   //Serial.println(digitalRead(SWITCH_FUNC_PIN));
   //delay(100);
   //followLine();
   //prncp_func1();
-  
+  //readSensor();
 }
+
 
 // Executes the first principle function
 
@@ -616,3 +639,31 @@ void adjustCourse() {
     break;
   }
 }
+
+void readSensor()
+{
+// put your main code here, to run repeatedly
+  int analogF = analogRead(SENSOR_F);
+  int analogL = analogRead(SENSOR_L);
+  int analogR = analogRead(SENSOR_R);
+  
+  //int digital = digitalRead(10);
+  
+  Serial.print(analogL);
+  Serial.print("\t\t");
+  Serial.print(analogF);
+  Serial.print("\t\t");
+  Serial.print(analogR);
+  Serial.println();
+  delay(100);
+
+}
+
+void printBlocks()
+{
+  for(int i = 0; i < 16; i++) {
+    lcd.write(0xff);
+  }
+}
+
+
