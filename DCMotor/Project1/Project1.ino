@@ -68,8 +68,8 @@
 Servo scanningServo;
 int sensorf_value, sensorl_value, sensorr_value = 0;
 int currentServoDegrees = 90;   // Servo is initially facing forwards
-int current_left_speed = 0;
-int current_right_speed = 0;
+int current_left_speed = MAX_SPEED;
+int current_right_speed = MAX_SPEED;
 
 int SIZE_IN = 5;
 int SIZE_OUT = 3;
@@ -114,8 +114,7 @@ void loop() {
   //Serial.println(digitalRead(SWITCH_FUNC_PIN));
   //delay(100);
   //followLine();
-  //prncp_func1();
- 
+  prncp_func1();
 }
 
 // Executes the first principle function
@@ -123,15 +122,39 @@ void loop() {
 void prncp_func1() {
   scanningServo.write(90);
   set_motors(FORWARD);
-  analogWrite(M1_SPEED_PIN, current_left_speed);
-  analogWrite(M2_SPEED_PIN, current_right_speed);
+
+  Serial.print(current_left_speed);
+  Serial.print("\t");
+  Serial.println(current_right_speed);
+
+  if (current_left_speed < 125 || current_right_speed < 125) {
+    current_left_speed = 255;
+    current_right_speed = 255;
+    analogWrite(M1_SPEED_PIN, 255);//current_left_speed);
+    analogWrite(M2_SPEED_PIN, 255);//current_right_speed);
+  } else {
+    analogWrite(M1_SPEED_PIN, current_left_speed);
+    analogWrite(M2_SPEED_PIN, current_right_speed);
+  }
+
+  int left_speed = current_left_speed;
+  int right_speed = current_right_speed;
 
   if (distanceFromSensor() > STOP_THRESHOLD) {
-    adjustCourse();
+    //adjustCourse();
+    move_forward(MAX_SPEED);
   }
 
   if (distanceFromSensor() <= STOP_THRESHOLD) {
-    slow_down(SLOW_DOWN_TIME * ((int) (distanceFromSensor() / STOP_THRESHOLD)));
+    float distance = distanceFromSensor();
+    if (distance > STOP_THRESHOLD) {
+      distance = STOP_THRESHOLD;
+    }
+    
+    slow_down(SLOW_DOWN_TIME * ((int) (distance / STOP_THRESHOLD)));
+    current_left_speed = left_speed;
+    current_right_speed = right_speed;
+    
     int turnDirection = scanEnvironment();
     int i;
 
@@ -483,6 +506,11 @@ void adjustCourse() {
 
   int left_measure;
   int right_measure;
+
+  Serial.print("Left measure:\t");
+  Serial.print(left_measure);
+  Serial.print("\t\tRight measure:\t");
+  Serial.println(right_measure);
 
   while (true) {
     left_measure = analogRead(LEFT_WHEEL);
