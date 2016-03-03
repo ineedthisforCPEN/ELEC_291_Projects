@@ -1,45 +1,70 @@
 #include <Servo.h>
 
-// Speed constants
-#define MAX_SPEED 255
-#define MIN_SPEED 0 // not moving
-#define SPEED_DEC 5 // decrement value for speed (when slowing down)
-#define FUNC1_TURN_SPEED 255
-#define FUNC2_TURN_SPEED 175
+//--------------------------------------
+// PIN DEFINITIONS
+//--------------------------------------
 
 // Arduino digital pins for controlling DC motors
-#define M1_DIR_PIN 4
-#define M1_SPEED_PIN 5
-#define M2_DIR_PIN 7
-#define M2_SPEED_PIN 6
+#define M1_DIR_PIN    4   // Direction pin for left motor
+#define M1_SPEED_PIN  5   // Speed pin for left motor
+#define M2_DIR_PIN    7   // Direction pin for right motor
+#define M2_SPEED_PIN  6   // Speed pin for right motor
+
+// Arduino pins used for the ultrasonic sensor
+#define ECHO          12  // Arduino pin to which the ultrasonic sensor's echo pin is connected
+#define TRIGGER       11  // Arduino pin to which the ultrasonic sensor's trigger pin is connected
+#define TEMPERATURE   A0  // Arduino pin to which the LM35 output is connected
+#define SERVO         10  // Arduino pin to which the servo output is connected
+
+// Arduino analog pins used for the hall effect sensors
+#define LEFT_WHEEL    A5  // Hall effect sensor on left side
+#define RIGHT_WHEEL   A6  // Hall effect sensor on right side
+
+// Arduino analog pins used for the optical sensors
+#define SENSOR_F A1
+#define SENSOR_L A2
+#define SENSOR_R A3
 
 // Arduino digital pins corresponding to the robot's functionalities
 #define SWITCH_A_PIN 2
 #define SWITCH_B_PIN 3
 
-#define ON 1
-#define OFF 0
+//--------------------------------------
+// CONSTANT DEFINITIONS
+//--------------------------------------
 
-// Robot directions
+// Speed constants
+#define MAX_SPEED   255   // Maximum speed (maximum voltage that can be applied to the motors)
+#define MIN_SPEED   0     // Not moving
+#define SPEED_DEC   5     // Decrement value for speed (when slowing down)
+#define TURN_SPEED  175   // The speed of the robot when turning
+
+// Threshold values
+#define BLACK_THRESHOLD     200   // Threshold for optical sensor - below this value means sensor is reading black (F2)
+#define STOP_THRESHOLD      40.00 // Below this value and the robot starts slowing down (F1)
+#define SCAN_THRESHOLD      10.00 // Below this value and the robot will definitely not turn in this direction (F1)
+#define SLOW_DOWN_TIME      1000  // How many milliseconds it will take for the robot to slow down (F1)
+#define F1_TURN_TIME        300   // How many milliseconds the robot will turn (F1)
+#define HALL_THRESHOLD      50    // Below this value means a magnet is detected (F1)
+#define ROTATION_THRESHOLD  20    // How many milliseconds of difference between wheel periods is acceptable (F1)
+
+// Robot directions (i.e. enumerating directions)
 #define FORWARD 0
 #define RIGHT 1
 #define LEFT 2
 #define BACKWARDS 3
 
-#define ECHO 10         // Arduino pin to which the ultrasonic sensor's echo pin is connected
-#define TRIGGER 11      // Arduino pin to which the ultrasonic sensor's trigger pin is connected
-#define TEMPERATURE A0  // Arduino pin to which the LM35 output is connected
-#define SERVO 12        // Arduino pin to which the servo output is connected
+// Other constants
+#define ON 1
+#define OFF 0
 
-// Optical sensors
-#define SENSOR_F A1
-#define SENSOR_L A2
-#define SENSOR_R A3
-#define BLACK_THRESHOLD 200
+//--------------------------------------
+// FUNCTION PROTOTYPES
+//--------------------------------------
 
-#define STOP_THRESHOLD 40.00
-#define SCAN_THRESHOLD 10.00
-#define SLOW_DOWN_TIME 1000
+//--------------------------------------
+// GLOBAL VARIABLES
+//--------------------------------------
 
 Servo scanningServo;
 bool leave = false;
@@ -51,22 +76,31 @@ int current_right_speed = 0;
 int switch_A_status;
 int switch_B_status;
 
+int inputPins[]  = {SWITCH_A_PIN, SWITCH_B_PIN,
+                    ECHO,
+                    SENSOR_F, SENSOR_L, SENSOR_R}
+int outputPins[] = {M1_DIR_PIN, M2_DIR_PIN
+                    TRIGGER, TEMPERATURE}
+
 void setup() {
+  int i;  // Counter variable used for initializing pins later in the setup() function
   Serial.begin(9600);
 
-  pinMode(SWITCH_A_PIN, INPUT);
-  pinMode(SWITCH_B_PIN, INPUT);
-  pinMode(M1_DIR_PIN, OUTPUT);
-  pinMode(M2_DIR_PIN, OUTPUT);
+  // Initialize input pins
+  for (i = 0; i < sizeof(inputPins); i++) {
+    pinMode(inputPins[i], INPUT);
+  }
 
-  pinMode(ECHO, INPUT);
-  pinMode(TRIGGER, OUTPUT);
-  pinMode(TEMPERATURE, INPUT);
+  // Initialize output pins
+  for (i = 0; i < sizeof(outputPins); i++) {
+    pinMode(outputPins[i], OUTPUT);
+  }
 
-  pinMode(SENSOR_F, INPUT);
-  pinMode(SENSOR_L, INPUT);
-  pinMode(SENSOR_R, INPUT);
+  // Initialize pin for servo motor
   scanningServo.attach(SERVO);
+
+  // Ensure servo motor is facing straight at the beginning
+  scanningServo.write(90);
 }
 
 void loop() {
@@ -94,39 +128,45 @@ void loop() {
 // Executes the first principle function
 
 void prncp_func1() {
-  float obstacleDistance;
-  int i;
-
   move_forward(MAX_SPEED);
-  
-  obstacleDistance = distanceFromSensor();
-  if (obstacleDistance <= STOP_THRESHOLD) {
+
+  while (distanceFromSensor() > STOP_THRESHOLD) {
+    Serial.print(distanceFromSensor());
+    Serial.print("\t");
+    Serial.println(analogRead(A0));
+    //adjustCourse(0);
+  }
+
+  if (distanceFromSensor() <= STOP_THRESHOLD) {
     int turnDirection;
-    
+    int i;
+  
     // Slow down if an object is detected and come to a stop
     slow_down(SLOW_DOWN_TIME);
-    Serial.println("STOPPED");
-    delay(500);
-    
+  
     // Scan the surroundings and take appropriate action
     turnDirection = scanEnvironment();
     switch(turnDirection) {
       case LEFT:
-        for (i = 0; i < 300; i++) {
-          turn_robot(LEFT, FUNC1_TURN_SPEED);
+        for (i = 0; i < TURN_TIME; i++) {
+          turn_robot(LEFT, TURN_SPEED);
         }
         Serial.println("TURNING LEFT");
         break;
       case RIGHT:
-        for (i = 0; i < 300; i++) {
-          turn_robot(RIGHT, FUNC2_TURN_SPEED);
+        for (i = 0; i < TURN_TIME; i++) {
+          turn_robot(RIGHT, TURN_SPEED);
         }
         Serial.println("TURNING RIGHT");
         break;
       case BACKWARDS:
         // Default case is to go backwards
       default:
-        //goBackwardsFunction();
+        set_motors(BACKWARDS);
+        analogWrite(M1_SPEED_PIN, MAX_SPEED);
+        analogWrite(M2_SPEED_PIN, MAX_SPEED);
+        delay(1000);
+        stop_motors();
         Serial.println("GOING BACKWARDS");
         break;
     }
@@ -145,27 +185,35 @@ void extra_func() {
   //nothing here yet
 }
 
-//------------------------------------------------------------------------------------------------------
+//--------------------------------------
+// HELPER FUNCTIONS FOR MOTORS
+//--------------------------------------
 
-// Move robot forward at a given speed
-
+/*
+ * Moves the robot forward at a given speed
+ * 
+ * Param: speed - the speed to set both motors
+ */
 void move_forward(int speed) {
-  set_motors(FORWARD);
-  current_left_speed = speed;
-  current_right_speed = speed;
-  analogWrite(M1_SPEED_PIN, speed);
-  analogWrite(M2_SPEED_PIN, speed);
+  set_motors(FORWARD);              // Ensure motors are set up to move forwards
+  current_left_speed = speed;       // Set left speed variable
+  current_right_speed = speed;      // Set right speed variable
+  analogWrite(M1_SPEED_PIN, speed); // Set the speed of the left motor
+  analogWrite(M2_SPEED_PIN, speed); // Set the speed of the right motor
 }
 
-// Turn robot from forward direction towards input direction for 1 ms
-
+/*
+ * Turns the robot from forward direction towards input direction for 1 millisecond
+ * 
+ * Param: direction - the direction to turn (NOTE: use predefined directions, i.e. LEFT, RIGHT)
+ * Param: turn_speed - the speed with which to turn
+ */
 void turn_robot(int direction, int turn_speed) {
-  set_motors(direction);
-  analogWrite(M1_SPEED_PIN, turn_speed);
-  analogWrite(M2_SPEED_PIN, turn_speed);
-  delay(1);
-  // once turning is finished, stop motors
-  stop_motors();
+  set_motors(direction);                    // Set direction of motors to be same as user input
+  analogWrite(M1_SPEED_PIN, turn_speed);    // Set speed of left motor
+  analogWrite(M2_SPEED_PIN, turn_speed);    // Set speed of right motor
+  delay(1);                                 // Turn robot for 1 millisecond
+  stop_motors();                            // Once turning is finished, stop motors
 }
 
 // Slow down robot from MAX_SPEED to MIN_SPEED
