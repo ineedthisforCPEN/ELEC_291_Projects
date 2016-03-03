@@ -214,7 +214,6 @@ void slow_down(int time) {
  * Param: motor - the motor to speed up (RIGHT or LEFT)
  * Param: amount - the amount to speed up by (0-255)
  */
-
 void speedup_motor(int motor, int amount) {
 
   int desired_speed;
@@ -250,7 +249,6 @@ void speedup_motor(int motor, int amount) {
  * Param: motor - the motor to slow down (RIGHT or LEFT)
  * Param: amount - the amount to slow down by (0-255)
  */
-
 void slowdown_motor(int motor, int amount) {
 
   int desired_speed;
@@ -280,8 +278,9 @@ void slowdown_motor(int motor, int amount) {
    
 }
 
-/* Stops the motors from turning */
-
+/*
+ * Stops the motors from turning
+ */
 void stop_motors() {
   analogWrite(M1_SPEED_PIN, MIN_SPEED);
   analogWrite(M2_SPEED_PIN, MIN_SPEED);
@@ -289,9 +288,9 @@ void stop_motors() {
 
 /*
  * Set the motors for a desired direction for the robot
+ * 
  * Param: direction - either FORWARD, LEFT, RIGHT, or BACKWARDS
  */
-
 void set_motors(int direction) {
   if (direction == FORWARD) {
     digitalWrite(M1_DIR_PIN, HIGH);
@@ -316,33 +315,6 @@ void set_motors(int direction) {
 //------------------------------------------------
 
 /**
- * This function is meant to calculate the sound's period based on the reading from the
- * LM35 temperature sensor and lecture slides. It reads the temperature sensor value, then
- * returns the calculated period.
- * 
- * This function takes into account that the sound wave must travel twice the distance
- * (hence, 20000.0 is used instead of 10000.0)
- */
-float calculatePeriod(void) {
-  long startTime = millis();                              // Get current uptime of Arduino board
-  long totalMilliVolts = 0;                               // Long for storing total millivolts (long to prevent overflow)
-  long numMeasures = 0;                                   // Long for storing number of measurements (long to prevent overflow)
-
-  while (millis() - startTime < 50) {                     // Measure for 50 milliseconds
-    totalMilliVolts += analogRead(TEMPERATURE);           // Add to total millivolts measures
-    numMeasures++;                                        // Increment measure counter
-  }
-
-  // Calculate the period, then return it
-  // Calculation gotten from lecture slides
-  // The value 0.415282392 is used instead of 500.0/1024.0 - we believe this will reduce the number of computations needed
-  // Calculation is (1000000 / 100) * (1 / (331.5 + 0.6 * Temperature))
-  // Our reduced calculation is seen below
-  return 20000.0 / (331.5 + 0.6*(((float) totalMilliVolts)/((float) numMeasures) * (0.415282392)));
-                                /*--------------------- Temperature in C -----------------------*/
-}
-
-/**
  * This function determines how far away an object is from the sensor. The calculations
  * are based on the formula given in the lecture slides
  * 
@@ -357,12 +329,19 @@ float distanceFromSensor() {
   // Measure how long it takes the echo signals to return
   unsigned long echoTime = pulseIn(ECHO, HIGH);
 
-  // Build in delay with calculatePeriod(), so we do not need to delay an extra 50ms after calling this function
-  float period = calculatePeriod();
+  // We will not be using the temperature pin to make out period measurements more accurate
+  // It is unlikely that temperature will fluctuate significantly in the test environment, and
+  // a change of 10 degrees celcius will not impact the distance measurement significantly
+  float period = 58.0;    // Assuming speed of sound is approximately 343 meters per second
+  delay(50);
 
   // Return the distance (in centimeters)
   return ((float) echoTime / period);
 }
+
+//------------------------------------------------
+// FUNCTIONALITY 2 HELPER FUNCTIONS
+//------------------------------------------------
 
 /**
    The function followLine() allows for the robot to follow a guided path using the reflective optical sensors. The sensors are attached at the front of the robot in a triangle formation.
@@ -373,7 +352,6 @@ float distanceFromSensor() {
              -when no sensors detect the line, the robot will travel forward for 0.5s before it reads the left and right sensors again. 
              -when both sensors detect line, the robot will choose a random direction to spin.         
 */
-
 void followLine() {
     sensorf_value = analogRead(SENSOR_F); //read the front sensor
     
@@ -431,7 +409,7 @@ void turn_to_check_path(int direction) {
 }
 
 //------------------------------------------------
-// FUNCTION FOR SCANNING THE ENVORONMENT
+// FUNCTIONALITY 1 HELPER FUNCTIONS
 //------------------------------------------------
 
 /**
