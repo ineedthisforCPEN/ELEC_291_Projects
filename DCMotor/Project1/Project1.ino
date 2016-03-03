@@ -35,7 +35,7 @@
 // Speed constants
 #define MAX_SPEED   255   // Maximum speed (maximum voltage that can be applied to the motors)
 #define MIN_SPEED   0     // Not moving
-#define SPEED_DEC   5     // Decrement value for speed (when slowing down)
+#define SPEED_DELTA 5     // Decrement (increment) value for slowing down (speeding up) robot
 #define TURN_SPEED  175   // The speed of the robot when turning
 
 // Threshold values
@@ -110,11 +110,11 @@ void loop() {
     prncp_func1();
   }
  */
-  //move_forward(MAX_SPEED);
   //Serial.println(digitalRead(SWITCH_FUNC_PIN));
   //delay(100);
   //followLine();
-  prncp_func1();
+  //prncp_func1();
+  
 }
 
 // Executes the first principle function
@@ -212,6 +212,19 @@ void turn_robot(int direction, int turn_speed) {
   stop_motors();                            // Once turning is finished, stop motors
 }
 
+/*
+ * 
+ */
+
+void speed_up(int time) {
+  for (int speed = MIN_SPEED; speed < MAX_SPEED; speed += SPEED_DELTA) {
+    current_left_speed = speed;
+    current_right_speed = speed;
+    analogWrite(M1_SPEED_PIN, speed);
+    analogWrite(M2_SPEED_PIN, speed);
+    delay(time / (MAX_SPEED / SPEED_DELTA));
+  }  
+}
 /* 
  * Slows down robot from MAX_SPEED to MIN_SPEED for a specified duration.  
  * 
@@ -219,12 +232,12 @@ void turn_robot(int direction, int turn_speed) {
  */
 
 void slow_down(int time) {
-  for (int speed = MAX_SPEED; speed > MIN_SPEED; speed -= SPEED_DEC) {
+  for (int speed = MAX_SPEED; speed > MIN_SPEED; speed -= SPEED_DELTA) {
     current_left_speed = speed;
     current_right_speed = speed;
     analogWrite(M1_SPEED_PIN, speed);
     analogWrite(M2_SPEED_PIN, speed);
-    delay(time / (MAX_SPEED / SPEED_DEC));
+    delay(time / (MAX_SPEED / SPEED_DELTA));
   }
 }
 
