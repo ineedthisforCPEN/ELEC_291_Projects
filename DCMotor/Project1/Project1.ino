@@ -1,5 +1,10 @@
 #include <Servo.h>
 
+/*
+Code for Multi-Functional Robot:
+Principal Functionalities 1 & 2
+*/
+
 //--------------------------------------
 // PIN DEFINITIONS
 //--------------------------------------
@@ -99,13 +104,12 @@ void setup() {
 void loop() {
   if(digitalRead(SWITCH_FUNC_PIN) != HIGH)
   {
-    followLine();
+    prncp_func1();
   }
 
   else
   {
-    //prncp_func1();
-    followLine();
+    followLine();     // prncp_func2();
   }
 }
 
@@ -210,6 +214,59 @@ void prncp_func1() {
         break;
     }
   }
+}
+
+/**
+   The function followLine() allows for the robot to follow a guided path using the reflective optical sensors. The sensors are attached at the front of the robot in a triangle formation.
+   Algorithm:
+             -when front sensor detects black tape, will move forward at _ speed
+             -when front sensor is off the black tape, the robot will read the left and right sensors. The robot will turn in the direction of whatever sensor that detects the line, and
+              will not stop turning until the front sensor detects the black line. When the line is detected, the robot continues to travel straight. 
+             -when no sensors detect the line, the robot will travel forward for 0.5s before it reads the left and right sensors again. 
+             -when both sensors detect line, the robot will choose a random direction to spin.         
+*/
+void followLine() {
+    sensorf_value = analogRead(SENSOR_F); //read the front sensor
+    
+    //if the front sensor detects the path, continue moving forward
+    if(sensorf_value > BLACK_THRESHOLD)
+    {
+        move_forward(175);
+        delay(1);
+    }
+    
+    else
+    {
+        sensorl_value = analogRead(SENSOR_L); //read the left sensor
+        sensorr_value = analogRead(SENSOR_R); //read the right sensor
+
+        //if the left sensor detects the path AND the right sensor does not, turn the robot to the left until the front sensor detects the path again,
+        //and then continue moving forward
+        if(sensorl_value > BLACK_THRESHOLD && sensorr_value <= BLACK_THRESHOLD)
+        {
+              turn_to_check_path(LEFT);
+        }
+
+        //if the right sensor detects the path AND the left sensor does not, turn the robot to the right until the front sensor detects the path again,
+        //and then continue moving forward
+        else if(sensorl_value <= BLACK_THRESHOLD && sensorr_value > BLACK_THRESHOLD)
+        {
+              turn_to_check_path(RIGHT);
+        }
+
+        //if neither sensor detects the path, move the robot forward a tiny bit and try again
+        else if(sensorl_value <= BLACK_THRESHOLD && sensorr_value <= BLACK_THRESHOLD)
+        {
+              move_forward(175);
+        }
+
+        //if both sensors detect the path, turn the robot left until the front sensor detects the path
+        else
+        {
+              turn_to_check_path(LEFT);
+        }
+    }
+ 
 }
 
 //--------------------------------------
@@ -457,10 +514,10 @@ void adjustCourse() {
   int right_measure;
 
   // Print statements useful for debugging
-  Serial.print("Left measure:\t");
-  Serial.print(left_measure);
-  Serial.print("\t\tRight measure:\t");
-  Serial.println(right_measure);
+  //Serial.print("Left measure:\t");
+  //Serial.print(left_measure);
+  //Serial.print("\t\tRight measure:\t");
+  //Serial.println(right_measure);
 
   while (true) {
     left_measure = analogRead(LEFT_WHEEL);
@@ -614,59 +671,6 @@ float distanceFromSensor(void) {
 //------------------------------------------------
 // FUNCTIONALITY 2 HELPER FUNCTIONS
 //------------------------------------------------
-
-/**
-   The function followLine() allows for the robot to follow a guided path using the reflective optical sensors. The sensors are attached at the front of the robot in a triangle formation.
-   Algorithm:
-             -when front sensor detects black tape, will move forward at _ speed
-             -when front sensor is off the black tape, the robot will read the left and right sensors. The robot will turn in the direction of whatever sensor that detects the line, and
-              will not stop turning until the front sensor detects the black line. When the line is detected, the robot continues to travel straight. 
-             -when no sensors detect the line, the robot will travel forward for 0.5s before it reads the left and right sensors again. 
-             -when both sensors detect line, the robot will choose a random direction to spin.         
-*/
-void followLine() {
-    sensorf_value = analogRead(SENSOR_F); //read the front sensor
-    
-    //if the front sensor detects the path, continue moving forward
-    if(sensorf_value > BLACK_THRESHOLD)
-    {
-        move_forward(175);
-        delay(1);
-    }
-    
-    else
-    {
-        sensorl_value = analogRead(SENSOR_L); //read the left sensor
-        sensorr_value = analogRead(SENSOR_R); //read the right sensor
-
-        //if the left sensor detects the path AND the right sensor does not, turn the robot to the left until the front sensor detects the path again,
-        //and then continue moving forward
-        if(sensorl_value > BLACK_THRESHOLD && sensorr_value <= BLACK_THRESHOLD)
-        {
-              turn_to_check_path(LEFT);
-        }
-
-        //if the right sensor detects the path AND the left sensor does not, turn the robot to the right until the front sensor detects the path again,
-        //and then continue moving forward
-        else if(sensorl_value <= BLACK_THRESHOLD && sensorr_value > BLACK_THRESHOLD)
-        {
-              turn_to_check_path(RIGHT);
-        }
-
-        //if neither sensor detects the path, move the robot forward a tiny bit and try again
-        else if(sensorl_value <= BLACK_THRESHOLD && sensorr_value <= BLACK_THRESHOLD)
-        {
-              move_forward(175);
-        }
-
-        //if both sensors detect the path, turn the robot left until the front sensor detects the path
-        else
-        {
-              turn_to_check_path(LEFT);
-        }
-    }
- 
-}
 
 //Function that turns the robot in a certain direction for 90 degrees. Stops if the front sensor detects the path
 void turn_to_check_path(int direction) {
