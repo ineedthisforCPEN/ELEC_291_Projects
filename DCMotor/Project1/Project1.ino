@@ -13,7 +13,6 @@
 // Arduino pins used for the ultrasonic sensor
 #define ECHO          12  // Arduino pin to which the ultrasonic sensor's echo pin is connected
 #define TRIGGER       11  // Arduino pin to which the ultrasonic sensor's trigger pin is connected
-#define TEMPERATURE   A0  // Arduino pin to which the LM35 output is connected
 #define SERVO         10  // Arduino pin to which the servo output is connected
 
 // Arduino analog pins used for the hall effect sensors
@@ -74,9 +73,9 @@ int current_left_speed = 0;
 int current_right_speed = 0;
 
 int SIZE_IN = 5;
-int SIZE_OUT = 4;
+int SIZE_OUT = 3;
 int inputPins[]  = {ECHO, SENSOR_F, SENSOR_L, SENSOR_R, SWITCH_FUNC_PIN};
-int outputPins[] = {M1_DIR_PIN, M2_DIR_PIN, TRIGGER, TEMPERATURE};
+int outputPins[] = {M1_DIR_PIN, M2_DIR_PIN, TRIGGER};
 
 void setup() {
   int i;  // Counter variable used for initializing pins later in the setup() function
