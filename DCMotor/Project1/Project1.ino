@@ -26,7 +26,7 @@
 #define SENSOR_R A1
 
 // Arduino digital pin corresponding to the robot's functionalities
-#define SWITCH_FUNC_PIN 2
+#define SWITCH_FUNC_PIN 9
 
 
 //--------------------------------------
@@ -102,7 +102,7 @@ void setup() {
 }
 
 void loop() {
-
+/*
   if(digitalRead(SWITCH_FUNC_PIN) != HIGH)
   {
     prncp_func1();
@@ -112,7 +112,8 @@ void loop() {
   {
     followLine();
   }
- 
+ */
+  move_forward(MAX_SPEED);
 }
 
 // Executes the first principle function
