@@ -472,7 +472,9 @@ int scanEnvironment(void) {
   }
 
   // Measure the distance to the nearest object
+  delay(100);
   rightDistance = distanceFromSensor();
+  delay(100);
   Serial.print("Right:\t");
   Serial.println(rightDistance);
 
@@ -483,7 +485,9 @@ int scanEnvironment(void) {
   }
 
   // Measure the distance to the nearest object
+  delay(100);
   leftDistance = distanceFromSensor();
+  delay(100);
   Serial.print("Left:\t");
   Serial.println(leftDistance);
 
@@ -491,6 +495,7 @@ int scanEnvironment(void) {
   while (currentServoDegrees > 90) {
     scanningServo.write(--currentServoDegrees);
   }
+  delay(100);
 
   if (leftDistance < SCAN_THRESHOLD && rightDistance < SCAN_THRESHOLD) {
     // If stuck, move backwards
