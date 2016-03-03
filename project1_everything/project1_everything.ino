@@ -1,3 +1,4 @@
+#include <LiquidCrystal.h>
 #include <Servo.h>
 
 //--------------------------------------
@@ -53,7 +54,7 @@
 #define SLOW_DOWN_TIME      1000  // How many milliseconds it will take for the robot to slow down (F1)
 #define F1_TURN_TIME        300   // How many milliseconds the robot will turn (F1)
 #define HALL_THRESHOLD      50    // Below this value means a magnet is detected (F1)
-#define ADJUST_THRESHOLD    200   // Threshold for adjusting the current speed of the motors - above = decrease, below = increase (F1)
+#define ADJUST_THRESHOLD    240   // Threshold for adjusting the current speed of the motors - above = decrease, below = increase (F1)
 
 // Robot directions (i.e. enumerating directions)
 #define FORWARD   0
@@ -87,6 +88,9 @@ int outputPins[] = {M1_DIR_PIN, M2_DIR_PIN, TRIGGER};
 // initialize the library with the number of the interface pins for the LCD
 LiquidCrystal lcd(RS_pin, Enable_pin, D4, D5, D6, D7);
 
+//displaying the speed
+
+
 void setup() {
   int i;  // Counter variable used for initializing pins later in the setup() function
   Serial.begin(9600);
@@ -114,13 +118,16 @@ void setup() {
 void loop() {
   if(digitalRead(SWITCH_FUNC_PIN) != HIGH)
   {
+   lcd.clear();
+   lcd.print("Func 1: Avoid Objects");
    prncp_func1();
    
   }
 
   else
   {
-
+    lcd.clear();
+    lcd.print("Func 1: Follow Line");
     followLine();
   }
  
@@ -650,6 +657,13 @@ void readSensor()
   Serial.println();
   delay(100);
 
+}
+
+void printBlocks()
+{
+  for(int i = 0; i < 16; i++) {
+    lcd.write(0xff);
+  }
 }
 
 
