@@ -39,8 +39,8 @@
 #define TURN_SPEED  175   // The speed of the robot when turning
 
 // Threshold values
-#define BLACK_THRESHOLD     200   // Threshold for optical sensor - below this value means sensor is reading black (F2)
-#define STOP_THRESHOLD      40.00 // Below this value and the robot starts slowing down (F1)
+#define BLACK_THRESHOLD     500   // Threshold for optical sensor - below this value means sensor is reading black (F2)
+#define STOP_THRESHOLD      45.00 // Below this value and the robot starts slowing down (F1)
 #define SCAN_THRESHOLD      10.00 // Below this value and the robot will definitely not turn in this direction (F1)
 #define SLOW_DOWN_TIME      1000  // How many milliseconds it will take for the robot to slow down (F1)
 #define F1_TURN_TIME        300   // How many milliseconds the robot will turn (F1)
@@ -66,7 +66,6 @@
 //--------------------------------------
 
 Servo scanningServo;
-bool leave = false;
 int sensorf_value, sensorl_value, sensorr_value = 0;
 int currentServoDegrees = 90;   // Servo is initially facing forwards
 int current_left_speed = 0;
@@ -99,90 +98,63 @@ void setup() {
 }
 
 void loop() {
-
+/*
   if(digitalRead(SWITCH_FUNC_PIN) != HIGH)
   {
-    prncp_func1();
+   followLine();
   }
 
   else
   {
-    followLine();
+
+    prncp_func1();
   }
+ */
+  //move_forward(MAX_SPEED);
+  //Serial.println(digitalRead(SWITCH_FUNC_PIN));
+  //delay(100);
+  //followLine();
+  //prncp_func1();
+ 
 }
 
 // Executes the first principle function
 
 void prncp_func1() {
-  move_forward(MAX_SPEED);
+  scanningServo.write(90);
+  set_motors(FORWARD);
+  analogWrite(M1_SPEED_PIN, current_left_speed);
+  analogWrite(M2_SPEED_PIN, current_right_speed);
 
-  while (distanceFromSensor() > STOP_THRESHOLD) {
-    Serial.print(distanceFromSensor());
-    Serial.print("\t");
-    Serial.println(analogRead(A0));
-    if(digitalRead(SWITCH_FUNC_PIN) == HIGH)
-    {
-        return;
-    }
+  if (distanceFromSensor() > STOP_THRESHOLD) {
     //adjustCourse(0);
   }
-  if (distanceFromSensor() <= STOP_THRESHOLD) {
-    int turnDirection;
-    int i;
-  
-    // Slow down if an object is detected and come to a stop
-    // Slow down time is proporitional to distance from obstacle
-    //    This assumes that slow down time is linearly proporitional to distance from obstacle
-    slow_down(SLOW_DOWN_TIME * ((int) (distanceFromSensor() / 45.0)));
-  
-    if(digitalRead(SWITCH_FUNC_PIN) == HIGH)
-    {
-      return;
-    }
 
-    // Scan the surroundings and take appropriate action
-    turnDirection = scanEnvironment();
-    switch(turnDirection) {
+  if (distanceFromSensor() <= STOP_THRESHOLD) {
+    slow_down(SLOW_DOWN_TIME * ((int) (distanceFromSensor() / STOP_THRESHOLD)));
+    int turnDirection = scanEnvironment();
+    int i;
+
+    switch (turnDirection) {
       case LEFT:
         for (i = 0; i < F1_TURN_TIME; i++) {
-          if(digitalRead(SWITCH_FUNC_PIN) == HIGH)
-          {
-            return;
-          }
           turn_robot(LEFT, TURN_SPEED);
         }
-        Serial.println("TURNING LEFT");
         break;
       case RIGHT:
         for (i = 0; i < F1_TURN_TIME; i++) {
-          if(digitalRead(SWITCH_FUNC_PIN) == HIGH)
-          {
-            return;
-          }
           turn_robot(RIGHT, TURN_SPEED);
         }
-        Serial.println("TURNING RIGHT");
         break;
       case BACKWARDS:
-        // Default case is to go backwards
       default:
         set_motors(BACKWARDS);
-        analogWrite(M1_SPEED_PIN, MAX_SPEED);
-        analogWrite(M2_SPEED_PIN, MAX_SPEED);
+        analogWrite(M1_SPEED_PIN, current_left_speed);
+        analogWrite(M2_SPEED_PIN, current_right_speed);
         delay(1000);
-        if(digitalRead(SWITCH_FUNC_PIN) == HIGH)
-        {
-          return;
-        }
         stop_motors();
-        Serial.println("GOING BACKWARDS");
         break;
     }
-
-    if(digitalRead(SWITCH_FUNC_PIN) == HIGH)
-      {
-        return;
-      }
   }
 }
 
@@ -383,7 +355,7 @@ void followLine() {
     //if the front sensor detects the path, continue moving forward
     if(sensorf_value > BLACK_THRESHOLD)
     {
-        move_forward(MAX_SPEED/2);
+        move_forward(175);
         delay(1);
     }
     
@@ -409,7 +381,7 @@ void followLine() {
         //if neither sensor detects the path, move the robot forward a tiny bit and try again
         else if(sensorl_value <= BLACK_THRESHOLD && sensorr_value <= BLACK_THRESHOLD)
         {
-              move_forward(MAX_SPEED);
+              move_forward(175);
         }
 
         //if both sensors detect the path, turn the robot left until the front sensor detects the path
@@ -459,29 +431,31 @@ int scanEnvironment(void) {
   // Smoothly turn the sensor to face the left
   while (currentServoDegrees > 0) {
     scanningServo.write(--currentServoDegrees);
-    delay(4);
+    delay(10);
   }
 
   // Measure the distance to the nearest object
+  delay(500);
   rightDistance = distanceFromSensor();
-  Serial.print("Right:\t");
-  Serial.println(rightDistance);
+  delay(500);
 
   // Smoothly turn the sensor to face the right
   while (currentServoDegrees < 180) {
     scanningServo.write(++currentServoDegrees);
-    delay(4);
+    delay(10);
   }
 
   // Measure the distance to the nearest object
+  delay(500);
   leftDistance = distanceFromSensor();
-  Serial.print("Left:\t");
-  Serial.println(leftDistance);
+  delay(500);
 
   // Smoothly return the sensor to face forwards
   while (currentServoDegrees > 90) {
     scanningServo.write(--currentServoDegrees);
+    delay(10);
   }
+  delay(500);
 
   if (leftDistance < SCAN_THRESHOLD && rightDistance < SCAN_THRESHOLD) {
     // If stuck, move backwards
@@ -493,9 +467,4 @@ int scanEnvironment(void) {
     // Turn right if there's more space on the right
     return RIGHT;
   }
-  
-  // By default, go backwards
-  return BACKWARDS;
 }
-
-
