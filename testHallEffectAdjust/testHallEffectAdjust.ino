@@ -1,9 +1,9 @@
-#define LEFT_WHEEL  A0          // The Arduino pin to which the left wheel hall effect sensor is attached
-#define RIGHT_WHEEL A1          // The Arduino pin to which the right wheel hall effect sensor is attached
+#define LEFT_WHEEL  A4          // The Arduino pin to which the left wheel hall effect sensor is attached
+#define RIGHT_WHEEL A5          // The Arduino pin to which the right wheel hall effect sensor is attached
 #define HALL_THRESHOLD 50       // The threshold for the hall effect sensor - if below the threshold, magnet is detected
 #define HALL_RATIO 50           // The maximum acceptable ratio - if crossed, adjust the path
 #define ROTATION_THRESHOLD 20  // Maximum allowable difference in periods of left and right wheel
-
+#define ADJUST_THRESHOLD 200
 // Arduino digital pins for controlling DC motors
 #define M1_DIR_PIN 4
 #define M1_SPEED_PIN 5
@@ -21,8 +21,8 @@
 #define SPEED_DEC 5 // decrement value for speed (when slowing down)
 
 int current_speed = 0;
-int left_speed = 0;
-int right_speed = 0;
+int current_left_speed = 0;
+int current_right_speed = 0;
 
 /* Function prototypes */
 void adjustCourse(void);
@@ -38,20 +38,13 @@ void setup() {
 }
 
 void loop() {
-  set_motors(FORWARD);
-  analogWrite(M1_SPEED_PIN, 255);
-  analogWrite(M2_SPEED_PIN, 230);
-  while(true) {
-    adjustCourse(255);
+  move_forward(MAX_SPEED);
+  while (true) {
+    adjustCourse();
   }
 }
 
-void adjustCourse(int currentSpeedVoltage) {
-  // Make sure the parameter is within a valid range (i.e. between 0 and 255 inclusive)
-  if (currentSpeedVoltage < 0) currentSpeedVoltage = 0;
-  else if (currentSpeedVoltage > 255) currentSpeedVoltage = 255;
-  
-  int slowerWheel;  // The pin whose wheel is going slower
+void adjustCourse() {
   long start_left = 0;  // Used to measure period of left wheel
   long start_right = 0; // Used to measure period of right wheel
   long period_left = 0;
@@ -64,60 +57,93 @@ void adjustCourse(int currentSpeedVoltage) {
     left_measure = analogRead(LEFT_WHEEL);
     right_measure = analogRead(RIGHT_WHEEL);
 
-    Serial.print(left_measure);
-    Serial.print("\t");
-    Serial.println(right_measure);
-
     if (start_left   == 0 && left_measure  < HALL_THRESHOLD) start_left   = millis();
     if (start_right  == 0 && right_measure < HALL_THRESHOLD) start_right  = millis();
-    
+
     // NOTE: 200 is used below because the fastest possible period is 450 milliseconds (200 is less than 450),
     // yet the wheel can spin enough in 200 milliseconds to pass the hall effect sensor wihtout being read
     // twice before completing a full revolution
-    if (period_left  == 0 && left_measure  < HALL_THRESHOLD && millis() - start_left  > 200)
+    if (period_left  == 0 && left_measure  < HALL_THRESHOLD && millis() - start_left  > 200) {
       period_left  = millis() - start_left;
-    if (period_right == 0 && right_measure < HALL_THRESHOLD && millis() - start_right > 200)
-      period_right = millis() - start_right;
-
-    // If both periods have been measured, leave this while loop
-    if (period_left != 0 && period_right != 0){
-      //Serial.print("start_left:\t");
-      //Serial.println(start_left);
-      //Serial.print("start_right:\t");
-      //Serial.println(start_right);
-      break;
     }
-  }
 
-  if (abs(period_left - period_right) <= ROTATION_THRESHOLD) {
-    // Don't adjust if the difference is withing the rotation threshold
-    return;
-  }
+    if (period_right == 0 && right_measure < HALL_THRESHOLD && millis() - start_right > 200) {
+      period_right = millis() - start_right;
+    }
 
-  Serial.print("Period of LEFT  wheel: \t");
-  Serial.println(period_left);
-  Serial.print("Period of RIGHT wheel: \t");
-  Serial.println(period_right);
-  Serial.println();
-  
-  if (period_left > period_right) {
-    // Right wheel is faster, slow down the right wheel
-    int changeVoltage = (int) (256.0 * ((float)(period_left - period_right))/0.45);
-    //slow_right(changeVoltage);
-    slow_right((int) (0.2*(period_left - period_right)));
-    Serial.print("Slow down RIGHT motor by ");
-    Serial.print(changeVoltage);
-    Serial.println(" units");
-    Serial.println("----------");
-  } else {
-    // Left wheel is faster, slow down the left wheel
-    int changeVoltage = (int) (256.0 * ((float)(period_right - period_left))/0.45);
-    //slow_left(changeVoltage);
-    slow_left((int) (0.2*(period_left - period_right)));
-    Serial.print("Slow down LEFT  motor by ");
-    Serial.print(-changeVoltage);
-    Serial.println(" units");
-    Serial.println("----------");
+    int period_diff = abs(period_left - period_right);
+
+    // once both periods have been measured...
+    if (period_left != 0 && period_right != 0) {
+
+      // if both wheels are going a bit too slow...
+      if ((current_left_speed < ADJUST_THRESHOLD) && (current_right_speed < ADJUST_THRESHOLD)) {
+
+        // left wheel is slower?
+        if (period_left > period_right) {
+          //speedup values were empirically determined
+          if (period_diff > 200)
+            speedup_motor(LEFT, 17);
+          else if (period_diff > 150)
+            speedup_motor(LEFT, 14);
+          else if (period_diff > 100)
+            speedup_motor(LEFT, 11);
+          else if (period_diff > 50)
+            speedup_motor(LEFT, 8);
+          else if (period_diff > 5)
+            speedup_motor(LEFT, 5);
+        }
+        
+        // right wheel is slower
+        else {
+          if (period_diff > 200)
+            speedup_motor(RIGHT, 17);
+          else if (period_diff > 150)
+            speedup_motor(RIGHT, 14);
+          else if (period_diff > 100)
+            speedup_motor(RIGHT, 11);
+          else if (period_diff > 50)
+            speedup_motor(RIGHT, 8);
+          else if (period_diff > 5)
+            speedup_motor(RIGHT, 5);
+        }
+      }
+
+        // otherwise, slow one of the wheels
+      else {
+        
+        // left wheel is slower?
+        if (period_left > period_right) {
+          
+          //slowdown values were empirically determined
+          if (period_diff > 200)
+            slowdown_motor(RIGHT, 17);
+          else if (period_diff > 150)
+            slowdown_motor(RIGHT, 14);
+          else if (period_diff > 100)
+            slowdown_motor(RIGHT, 11);
+          else if (period_diff > 50)
+            slowdown_motor(RIGHT, 8);
+          else if (period_diff > 5)
+            slowdown_motor(RIGHT, 5);
+        }
+        
+        // right wheel is slower
+        else {
+          if (period_diff > 200)
+            slowdown_motor(LEFT, 17);
+          else if (period_diff > 150)
+            slowdown_motor(LEFT, 14);
+          else if (period_diff > 100)
+            slowdown_motor(LEFT, 11);
+          else if (period_diff > 50)
+            slowdown_motor(LEFT, 8);
+          else if (period_diff > 5)
+            slowdown_motor(LEFT, 5);
+        }
+      }
+    }
+    break;
   }
 }
 
@@ -125,11 +151,11 @@ void adjustCourse(int currentSpeedVoltage) {
 
 // Move robot forward at a given speed
 
+
 void move_forward(int speed) {
   set_motors(FORWARD);
-  current_speed = speed;
-  left_speed = speed;
-  right_speed = speed;
+  current_right_speed = speed;
+  current_left_speed = speed;
   analogWrite(M1_SPEED_PIN, speed);
   analogWrite(M2_SPEED_PIN, speed);
 }
@@ -150,23 +176,75 @@ void turn_robot(int direction) {
 
 void slow_down(int time) {
   for (int speed = MAX_SPEED; speed > MIN_SPEED; speed -= SPEED_DEC) {
-    current_speed = speed;
-    left_speed = speed;
-    right_speed = speed;
+    current_left_speed = speed;
+    current_right_speed = speed;
     analogWrite(M1_SPEED_PIN, speed);
     analogWrite(M2_SPEED_PIN, speed);
     delay(time / (MAX_SPEED / SPEED_DEC));
   }
 }
+void speedup_motor(int motor, int amount) {
 
-void slow_right(int slow_amount) {
-  right_speed -= slow_amount;
-  analogWrite(M2_SPEED_PIN, right_speed);
+  int desired_speed;
+  if (motor == RIGHT) {
+    desired_speed = current_right_speed + amount;
+    if (desired_speed > MAX_SPEED) {
+      analogWrite(M2_SPEED_PIN, MAX_SPEED);
+      current_right_speed = MAX_SPEED;
+    }
+    else {
+      analogWrite(M2_SPEED_PIN, desired_speed);
+      current_right_speed = desired_speed;
+    }
+  }
+  
+  else if (motor == LEFT) {
+    desired_speed = current_left_speed + amount;
+    if (desired_speed > MAX_SPEED) {
+      analogWrite(M1_SPEED_PIN, MAX_SPEED);
+      current_left_speed = MAX_SPEED;
+    }
+    else {
+      analogWrite(M1_SPEED_PIN, desired_speed);
+      current_left_speed = desired_speed;
+    }
+  }
+   
 }
 
-void slow_left(int slow_amount) {
-  left_speed -= slow_amount;
-  analogWrite(M1_SPEED_PIN, left_speed);
+/* 
+ * Slows down a motor by a given amount.
+ * 
+ * Param: motor - the motor to slow down (RIGHT or LEFT)
+ * Param: amount - the amount to slow down by (0-255)
+ */
+void slowdown_motor(int motor, int amount) {
+
+  int desired_speed;
+  if (motor == RIGHT) {
+    desired_speed = current_right_speed - amount;
+    if (desired_speed < MIN_SPEED) {
+      analogWrite(M2_SPEED_PIN, MIN_SPEED);
+      current_right_speed = MIN_SPEED;
+    }
+    else {
+      analogWrite(M2_SPEED_PIN, desired_speed);
+      current_right_speed = desired_speed;
+    }
+  }
+  
+  else if (motor == LEFT) {
+    desired_speed = current_left_speed - amount;
+    if (desired_speed < MIN_SPEED) {
+      analogWrite(M1_SPEED_PIN, MIN_SPEED);
+      current_left_speed = MIN_SPEED;
+    }
+    else {
+      analogWrite(M1_SPEED_PIN, desired_speed);
+      current_left_speed = desired_speed;
+    }
+  }
+   
 }
 
 // Stops the motors from turning
@@ -192,7 +270,3 @@ void set_motors(int direction) {
     digitalWrite(M2_DIR_PIN, HIGH);
   }
 }
-
-//------------------------------------------------------------------------------------------------------
-
-
