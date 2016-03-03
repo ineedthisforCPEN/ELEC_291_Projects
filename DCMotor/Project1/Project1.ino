@@ -100,7 +100,7 @@ void setup() {
 }
 
 void loop() {
-/*
+
   if(digitalRead(SWITCH_FUNC_PIN) != HIGH)
   {
     prncp_func1();
@@ -108,10 +108,12 @@ void loop() {
 
   else
   {
-    followLine();
+    Serial.println(1);
   }
- */
-  move_forward(MAX_SPEED);
+ 
+  //move_forward(MAX_SPEED);
+  //Serial.println(digitalRead(SWITCH_FUNC_PIN));
+  //delay(100);
 }
 
 // Executes the first principle function
@@ -492,3 +494,5 @@ int scanEnvironment(void) {
   // By default, go backwards
   return BACKWARDS;
 }
+
+
