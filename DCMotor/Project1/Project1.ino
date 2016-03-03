@@ -40,7 +40,7 @@
 #define TURN_SPEED  175   // The speed of the robot when turning
 
 // Threshold values
-#define BLACK_THRESHOLD     200   // Threshold for optical sensor - below this value means sensor is reading black (F2)
+#define BLACK_THRESHOLD     500   // Threshold for optical sensor - below this value means sensor is reading black (F2)
 #define STOP_THRESHOLD      40.00 // Below this value and the robot starts slowing down (F1)
 #define SCAN_THRESHOLD      10.00 // Below this value and the robot will definitely not turn in this direction (F1)
 #define SLOW_DOWN_TIME      1000  // How many milliseconds it will take for the robot to slow down (F1)
@@ -100,20 +100,22 @@ void setup() {
 }
 
 void loop() {
-
+/*
   if(digitalRead(SWITCH_FUNC_PIN) != HIGH)
   {
-    prncp_func1();
+   followLine();
   }
 
   else
   {
-    Serial.println(1);
+    prncp_func1();
   }
- 
+ */
   //move_forward(MAX_SPEED);
   //Serial.println(digitalRead(SWITCH_FUNC_PIN));
   //delay(100);
+  //followLine();
+  prncp_func1();
 }
 
 // Executes the first principle function
@@ -385,7 +387,7 @@ void followLine() {
     //if the front sensor detects the path, continue moving forward
     if(sensorf_value > BLACK_THRESHOLD)
     {
-        move_forward(MAX_SPEED/2);
+        move_forward(175);
         delay(1);
     }
     
@@ -411,7 +413,7 @@ void followLine() {
         //if neither sensor detects the path, move the robot forward a tiny bit and try again
         else if(sensorl_value <= BLACK_THRESHOLD && sensorr_value <= BLACK_THRESHOLD)
         {
-              move_forward(MAX_SPEED);
+              move_forward(175);
         }
 
         //if both sensors detect the path, turn the robot left until the front sensor detects the path
