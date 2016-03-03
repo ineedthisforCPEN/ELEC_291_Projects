@@ -27,7 +27,7 @@
 
 // Arduino digital pin corresponding to the robot's functionalities
 #define SWITCH_FUNC_PIN 9
-
+/*
 // Arduino digital pins used for the LC display
 #define RS_pin      0   
 #define Enable_pin  1
@@ -35,7 +35,7 @@
 #define D5          3
 #define D6          8 
 #define D7          13
-
+*/
 
 //--------------------------------------
 // CONSTANT DEFINITIONS
@@ -49,10 +49,10 @@
 
 // Threshold values
 #define BLACK_THRESHOLD     500   // Threshold for optical sensor - below this value means sensor is reading black (F2)
-#define STOP_THRESHOLD      45.00 // Below this value and the robot starts slowing down (F1)
+#define STOP_THRESHOLD      40.00 // Below this value and the robot starts slowing down (F1)
 #define SCAN_THRESHOLD      10.00 // Below this value and the robot will definitely not turn in this direction (F1)
 #define SLOW_DOWN_TIME      1000  // How many milliseconds it will take for the robot to slow down (F1)
-#define F1_TURN_TIME        300   // How many milliseconds the robot will turn (F1)
+#define F1_TURN_TIME        410   // How many milliseconds the robot will turn (F1)
 #define HALL_THRESHOLD      50    // Below this value means a magnet is detected (F1)
 #define ADJUST_THRESHOLD    240   // Threshold for adjusting the current speed of the motors - above = decrease, below = increase (F1)
 
@@ -86,7 +86,7 @@ int inputPins[]  = {ECHO, SENSOR_F, SENSOR_L, SENSOR_R, SWITCH_FUNC_PIN};
 int outputPins[] = {M1_DIR_PIN, M2_DIR_PIN, TRIGGER};
 
 // initialize the library with the number of the interface pins for the LCD
-LiquidCrystal lcd(RS_pin, Enable_pin, D4, D5, D6, D7);
+//LiquidCrystal lcd(RS_pin, Enable_pin, D4, D5, D6, D7);
 
 //displaying the speed
 
@@ -96,7 +96,7 @@ void setup() {
   Serial.begin(9600);
   
   // set up the LCD's number of columns and rows:
-  lcd.begin(16, 2);
+  //lcd.begin(16, 2);
 
   // Initialize input pins
   for (i = 0; i < SIZE_IN; i++) {
@@ -118,16 +118,12 @@ void setup() {
 void loop() {
   if(digitalRead(SWITCH_FUNC_PIN) != HIGH)
   {
-   lcd.clear();
-   lcd.print("Func 1: Avoid Objects");
    prncp_func1();
    
   }
 
   else
   {
-    lcd.clear();
-    lcd.print("Func 1: Follow Line");
     followLine();
   }
  
@@ -657,13 +653,6 @@ void readSensor()
   Serial.println();
   delay(100);
 
-}
-
-void printBlocks()
-{
-  for(int i = 0; i < 16; i++) {
-    lcd.write(0xff);
-  }
 }
 
 
