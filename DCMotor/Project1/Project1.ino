@@ -194,7 +194,7 @@ void prncp_func1() {
 /*
  * Moves the robot forward at a given speed
  * 
- * Param: speed - the speed to set both motors
+ * Param: speed - the speed to set both motors (values ranging from MIN_SPEED to MAX_SPEED)
  */
 void move_forward(int speed) {
   set_motors(FORWARD);              // Ensure motors are set up to move forwards
@@ -218,8 +218,11 @@ void turn_robot(int direction, int turn_speed) {
   stop_motors();                            // Once turning is finished, stop motors
 }
 
-// Slow down robot from MAX_SPEED to MIN_SPEED
-// time (ms) specifies duration over which robot slows down
+/* 
+ * Slows down robot from MAX_SPEED to MIN_SPEED for a specified duration.  
+ * 
+ * Param: time - duration over which robot slows down (in ms)
+ */
 
 void slow_down(int time) {
   for (int speed = MAX_SPEED; speed > MIN_SPEED; speed -= SPEED_DEC) {
