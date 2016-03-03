@@ -43,8 +43,8 @@
 #define BLACK_THRESHOLD     500   // Threshold for optical sensor - below this value means sensor is reading black (F2)
 #define STOP_THRESHOLD      40.00 // Below this value and the robot starts slowing down (F1)
 #define SCAN_THRESHOLD      10.00 // Below this value and the robot will definitely not turn in this direction (F1)
-#define SLOW_DOWN_TIME      1200  // How many milliseconds it will take for the robot to slow down (F1)
-#define F1_TURN_TIME        390   // How many milliseconds the robot will turn (F1)
+#define SLOW_DOWN_TIME      1150  // How many milliseconds it will take for the robot to slow down (F1)
+#define F1_TURN_TIME        385   // How many milliseconds the robot will turn (F1)
 #define HALL_THRESHOLD      50    // Below this value means a magnet is detected (F1)
 #define ADJUST_THRESHOLD    240   // Threshold for adjusting the current speed of the motors - above = decrease, below = increase (F1)
 
@@ -99,11 +99,12 @@ void setup() {
 void loop() {
   if(digitalRead(SWITCH_FUNC_PIN) != HIGH)
   {
-   prncp_func1();
+    followLine();
   }
 
   else
   {
+    //prncp_func1();
     followLine();
   }
 }
@@ -121,6 +122,7 @@ void loop() {
  * speed.
  */
 void prncp_func1() {
+  Serial.println("testing");
   scanningServo.write(90);
   set_motors(FORWARD);
 
@@ -158,6 +160,7 @@ void prncp_func1() {
   if (distanceFromSensor() <= STOP_THRESHOLD) {
     accelerateFlag = 1;
     float distance = distanceFromSensor();
+    Serial.println(distance);
 
     // This prevents any fluctuations in the ultrasonic sensor from causing problems
     // Set a distance saturation at STOP_THRESHOLD
@@ -166,7 +169,7 @@ void prncp_func1() {
     }
 
     // Begin slowing the motors, then restore the values in the global variables current_left_speed and current_right_speed
-    slow_down(SLOW_DOWN_TIME * ((int) (distance / STOP_THRESHOLD)));
+    slow_down(SLOW_DOWN_TIME);//SLOW_DOWN_TIME * ((int) (distance / STOP_THRESHOLD)));
     current_left_speed = left_speed;
     current_right_speed = right_speed;
     
@@ -454,10 +457,10 @@ void adjustCourse() {
   int right_measure;
 
   // Print statements useful for debugging
-  //Serial.print("Left measure:\t");
-  //Serial.print(left_measure);
-  //Serial.print("\t\tRight measure:\t");
-  //Serial.println(right_measure);
+  Serial.print("Left measure:\t");
+  Serial.print(left_measure);
+  Serial.print("\t\tRight measure:\t");
+  Serial.println(right_measure);
 
   while (true) {
     left_measure = analogRead(LEFT_WHEEL);
