@@ -30,10 +30,10 @@
 // Arduino digital pins used for the LC display
 #define RS_pin      0   
 #define Enable_pin  1
-#define D4          3
-#define D5          4
-#define D6          5
-#define D7          6
+#define D4          2
+#define D5          3
+#define D6          8 
+#define D7          13
 
 
 //--------------------------------------
