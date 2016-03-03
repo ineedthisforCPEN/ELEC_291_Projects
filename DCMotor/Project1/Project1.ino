@@ -43,8 +43,8 @@
 #define BLACK_THRESHOLD     500   // Threshold for optical sensor - below this value means sensor is reading black (F2)
 #define STOP_THRESHOLD      40.00 // Below this value and the robot starts slowing down (F1)
 #define SCAN_THRESHOLD      10.00 // Below this value and the robot will definitely not turn in this direction (F1)
-#define SLOW_DOWN_TIME      1000  // How many milliseconds it will take for the robot to slow down (F1)
-#define F1_TURN_TIME        400   // How many milliseconds the robot will turn (F1)
+#define SLOW_DOWN_TIME      1200  // How many milliseconds it will take for the robot to slow down (F1)
+#define F1_TURN_TIME        390   // How many milliseconds the robot will turn (F1)
 #define HALL_THRESHOLD      50    // Below this value means a magnet is detected (F1)
 #define ADJUST_THRESHOLD    240   // Threshold for adjusting the current speed of the motors - above = decrease, below = increase (F1)
 
