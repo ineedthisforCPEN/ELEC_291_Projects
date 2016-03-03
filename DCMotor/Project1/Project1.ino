@@ -49,9 +49,9 @@
 #define ROTATION_THRESHOLD  20    // How many milliseconds of difference between wheel periods is acceptable (F1)
 
 // Robot directions (i.e. enumerating directions)
-#define FORWARD 0
-#define RIGHT 1
-#define LEFT 2
+#define FORWARD   0
+#define RIGHT     1
+#define LEFT      2
 #define BACKWARDS 3
 
 // Other constants
@@ -108,12 +108,8 @@ void loop() {
 
   else
   {
-    Serial.println(1);
+    followLine();
   }
- 
-  //move_forward(MAX_SPEED);
-  //Serial.println(digitalRead(SWITCH_FUNC_PIN));
-  //delay(100);
 }
 
 // Executes the first principle function
