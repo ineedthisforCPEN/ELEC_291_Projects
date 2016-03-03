@@ -27,6 +27,14 @@
 // Arduino digital pin corresponding to the robot's functionalities
 #define SWITCH_FUNC_PIN 9
 
+// Arduino digital pins used for the LC display
+#define RS_pin      0   
+#define Enable_pin  1
+#define D4          3
+#define D5          4
+#define D6          5
+#define D7          6
+
 
 //--------------------------------------
 // CONSTANT DEFINITIONS
@@ -76,9 +84,15 @@ int SIZE_OUT = 3;
 int inputPins[]  = {ECHO, SENSOR_F, SENSOR_L, SENSOR_R, SWITCH_FUNC_PIN};
 int outputPins[] = {M1_DIR_PIN, M2_DIR_PIN, TRIGGER};
 
+// initialize the library with the number of the interface pins for the LCD
+LiquidCrystal lcd(RS_pin, Enable_pin, D4, D5, D6, D7);
+
 void setup() {
   int i;  // Counter variable used for initializing pins later in the setup() function
   Serial.begin(9600);
+  
+  // set up the LCD's number of columns and rows:
+  lcd.begin(16, 2);
 
   // Initialize input pins
   for (i = 0; i < SIZE_IN; i++) {
@@ -98,23 +112,24 @@ void setup() {
 }
 
 void loop() {
-/*
   if(digitalRead(SWITCH_FUNC_PIN) != HIGH)
   {
-   followLine();
+   prncp_func1();
+   
   }
 
   else
   {
 
-    prncp_func1();
+    followLine();
   }
- */
+ 
   //move_forward(MAX_SPEED);
   //Serial.println(digitalRead(SWITCH_FUNC_PIN));
   //delay(100);
   //followLine();
-  prncp_func1();
+  //prncp_func1();
+  //readSensor();
 }
 
 // Executes the first principle function
@@ -162,11 +177,19 @@ void prncp_func1() {
       case LEFT:
         for (i = 0; i < F1_TURN_TIME; i++) {
           turn_robot(LEFT, TURN_SPEED);
+          if(digitalRead(SWITCH_FUNC_PIN) == HIGH)
+          {
+            return;
+          }
         }
         break;
       case RIGHT:
         for (i = 0; i < F1_TURN_TIME; i++) {
           turn_robot(RIGHT, TURN_SPEED);
+          if(digitalRead(SWITCH_FUNC_PIN) == HIGH)
+          {
+            return;
+          }
         }
         break;
       case BACKWARDS:
@@ -175,6 +198,10 @@ void prncp_func1() {
         analogWrite(M1_SPEED_PIN, current_left_speed);
         analogWrite(M2_SPEED_PIN, current_right_speed);
         delay(1000);
+        if(digitalRead(SWITCH_FUNC_PIN) == HIGH)
+         {
+            return;
+         }
         stop_motors();
         break;
     }
@@ -605,3 +632,24 @@ void adjustCourse() {
     break;
   }
 }
+
+void readSensor()
+{
+// put your main code here, to run repeatedly
+  int analogF = analogRead(SENSOR_F);
+  int analogL = analogRead(SENSOR_L);
+  int analogR = analogRead(SENSOR_R);
+  
+  //int digital = digitalRead(10);
+  
+  Serial.print(analogL);
+  Serial.print("\t\t");
+  Serial.print(analogF);
+  Serial.print("\t\t");
+  Serial.print(analogR);
+  Serial.println();
+  delay(100);
+
+}
+
+
