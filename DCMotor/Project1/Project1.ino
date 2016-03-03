@@ -73,8 +73,6 @@ int currentServoDegrees = 90;   // Servo is initially facing forwards
 int current_left_speed = 0;
 int current_right_speed = 0;
 
-int switch_A_status;
-int switch_B_status;
 int SIZE_IN = 5;
 int SIZE_OUT = 4;
 int inputPins[]  = {ECHO, SENSOR_F, SENSOR_L, SENSOR_R, SWITCH_FUNC_PIN};
@@ -163,16 +161,6 @@ void prncp_func1() {
   }
 }
 
-// Executes the second principle function
-
-
-
-// Executes the extra function
-
-void extra_func() {
-  //nothing here yet
-}
-
 //--------------------------------------
 // HELPER FUNCTIONS FOR MOTORS
 //--------------------------------------
@@ -217,7 +205,12 @@ void slow_down(int time) {
   }
 }
 
-// Speeds up the motor (RIGHT or LEFT) by a given amount.
+/* 
+ * Speeds up a motor by a given amount.
+ * 
+ * Param: motor - the motor to speed up (RIGHT or LEFT)
+ * Param: amount - the amount to speed up by (0-255)
+ */
 
 void speedup_motor(int motor, int amount) {
 
@@ -248,7 +241,12 @@ void speedup_motor(int motor, int amount) {
    
 }
 
-// Slows down the motor (RIGHT or LEFT) by a given amount.
+/* 
+ * Slows down a motor by a given amount.
+ * 
+ * Param: motor - the motor to slow down (RIGHT or LEFT)
+ * Param: amount - the amount to slow down by (0-255)
+ */
 
 void slowdown_motor(int motor, int amount) {
 
@@ -279,14 +277,17 @@ void slowdown_motor(int motor, int amount) {
    
 }
 
-// Stops the motors from turning
+/* Stops the motors from turning */
 
 void stop_motors() {
   analogWrite(M1_SPEED_PIN, MIN_SPEED);
   analogWrite(M2_SPEED_PIN, MIN_SPEED);
 }
 
-// Set the motors for a desired direction for the robot
+/*
+ * Set the motors for a desired direction for the robot
+ * Param: direction - either FORWARD, LEFT, RIGHT, or BACKWARDS
+ */
 
 void set_motors(int direction) {
   if (direction == FORWARD) {
