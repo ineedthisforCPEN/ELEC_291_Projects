@@ -573,6 +573,7 @@ void adjustCourse() {
           else if (period_diff > 3)
             speedup_motor(RIGHT, 2);
         }
+        break;
       }
 
         // otherwise, slow one of the wheels
@@ -608,8 +609,8 @@ void adjustCourse() {
             slowdown_motor(LEFT, 2);
         }
       }
+      break;
     }
-    break;
   }
 }
 
