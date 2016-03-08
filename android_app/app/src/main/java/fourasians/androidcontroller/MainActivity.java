@@ -1,6 +1,10 @@
 package fourasians.androidcontroller;
 
+import android.app.Application;
+import android.bluetooth.BluetoothSocket;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -11,8 +15,12 @@ import android.view.MenuItem;
 
 import android.widget.Button;
 import android.widget.ListView;
+
+import java.io.IOException;
 import java.util.Set;
 import java.util.ArrayList;
+import java.util.UUID;
+
 import android.widget.Toast;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
@@ -25,20 +33,23 @@ import android.bluetooth.BluetoothDevice;
 public class MainActivity extends AppCompatActivity {
 
 
-    Button btnPaired = (Button)findViewById(R.id.bConnectNew);
-    ListView devicelist = (ListView)findViewById(R.id.listView);
-
+    private static final int SUCCESS_CONNECT = 0;
+    Button btnPaired;
+    ListView devicelist;
+    static BluetoothDevice device;
     private BluetoothAdapter myBluetooth = null;
     private Set<BluetoothDevice> pairedDevices;
-    public static final String EXTRA_ADDRESS = "address";
-
-
+    public static final String EXTRA_ADDRESS = "string";
+    public static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        btnPaired = (Button)findViewById(R.id.bConnectNew);
+        devicelist = (ListView)findViewById(R.id.listView);
+        //get bluetooth adapter
         myBluetooth = BluetoothAdapter.getDefaultAdapter();
         if(myBluetooth == null)
         {
@@ -47,13 +58,12 @@ public class MainActivity extends AppCompatActivity {
             //finish apk
             finish();
         }
+        //enable bluetooth
         else
         {
-            if (myBluetooth.isEnabled()) {
+            if (!myBluetooth.isEnabled()) {
 
-            }
-            else
-            {
+
                 //Ask to the user turn the bluetooth on
                 Intent turnBTon = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(turnBTon,1);
@@ -71,14 +81,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void pairedDevicesList()
     {
+        //querying paired devices
         pairedDevices = myBluetooth.getBondedDevices();
         ArrayList<String> list = new ArrayList<String>();
 
         if (pairedDevices.size()>0)
         {
-            for(BluetoothDevice device : pairedDevices)
+            for(BluetoothDevice dev : pairedDevices)
             {
-                list.add(device.getName() + "\n" + device.getAddress()); //Get the device's name and the address
+                list.add(dev.getName() + "\n" + dev.getAddress()); //Get the device's name and the addres
+                device = dev;
             }
         }
         else
@@ -99,6 +111,8 @@ public class MainActivity extends AppCompatActivity {
             // Get the device MAC address, the last 17 chars in the View
             String info = ((TextView) v).getText().toString();
             String address = info.substring(info.length() - 17);
+            //ConnectThread connect = new ConnectThread(selectDevice);
+            //connect.start();
             // Make an intent to start next activity.
             Intent i = new Intent(MainActivity.this, ArduinoControll.class);
             //Change the activity.
@@ -106,5 +120,4 @@ public class MainActivity extends AppCompatActivity {
             startActivity(i);
         }
     };
-
 }

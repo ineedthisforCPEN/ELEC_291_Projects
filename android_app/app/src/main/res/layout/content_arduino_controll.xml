@@ -15,46 +15,78 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Turn On"
+        android:text="Move Forward"
         android:id="@+id/button2"
-        android:layout_marginTop="47dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignLeft="@+id/button3"
-        android:layout_alignStart="@+id/button3" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Turn Off"
-        android:id="@+id/button3"
-        android:layout_marginTop="92dp"
-        android:layout_below="@+id/button2"
-        android:layout_alignLeft="@+id/button4"
-        android:layout_alignStart="@+id/button4" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Disconnect"
-        android:id="@+id/button4"
-        android:layout_marginTop="80dp"
-        android:layout_below="@+id/button3"
+        android:layout_marginTop="67dp"
+        android:layout_below="@+id/button5"
         android:layout_centerHorizontal="true" />
 
-    <SeekBar
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/seekBar"
-        android:layout_below="@+id/button4"
+        android:text="Stop"
+        android:id="@+id/button3"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="74dp"
-        android:indeterminate="false" />
+        android:layout_marginBottom="75dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New Text"
+        android:text="Robot Controller"
         android:id="@+id/textView"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Left"
+        android:id="@+id/button"
+        android:layout_marginTop="55dp"
+        android:layout_below="@+id/button2"
+        android:layout_toLeftOf="@+id/button2"
+        android:layout_toStartOf="@+id/button2" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="RIGHT"
+        android:id="@+id/button4"
+        android:layout_alignTop="@+id/button"
+        android:layout_toRightOf="@+id/button2"
+        android:layout_toEndOf="@+id/button2" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="FUNC1"
+        android:id="@+id/button5"
+        android:layout_marginTop="75dp"
+        android:layout_below="@+id/textView"
+        android:layout_toLeftOf="@+id/button2"
+        android:layout_toStartOf="@+id/button2" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="FUNC2"
+        android:id="@+id/button6"
+        android:layout_alignTop="@+id/button5"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="FUNC3"
+        android:id="@+id/button7"
+        android:layout_alignTop="@+id/button6"
+        android:layout_alignLeft="@+id/button4"
+        android:layout_alignStart="@+id/button4" />
+
 </RelativeLayout>
