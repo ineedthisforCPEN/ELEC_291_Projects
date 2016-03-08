@@ -1,5 +1,22 @@
 #include <Servo.h>
+#include <SoftwareSerial.h>                         // Software Serial Port
 
+/*
+ Set up bluetooth
+ */
+ #define RxD         3
+ #define TxD         2
+
+int button_pressed;
+
+char recvChar;
+String data;
+bool movef; 
+bool movel; 
+bool mover; 
+
+SoftwareSerial blueToothSerial(RxD,TxD);
+ 
 /*
 Code for Multi-Functional Robot:
 Principal Functionalities 1 & 2
@@ -83,7 +100,11 @@ int outputPins[] = {M1_DIR_PIN, M2_DIR_PIN, TRIGGER};
 void setup() {
   int i;  // Counter variable used for initializing pins later in the setup() function
   Serial.begin(9600);
-
+  button_pressed = 0;
+  movef = false; 
+  movel = false; 
+  mover = false; 
+  
   // Initialize input pins
   for (i = 0; i < SIZE_IN; i++) {
     pinMode(inputPins[i], INPUT);
@@ -99,19 +120,31 @@ void setup() {
 
   // Ensure servo motor is facing straight at the beginning
   scanningServo.write(90);
+
+  setupBlueToothConnection();
+  delay(1000);
+  Serial.flush();
+  blueToothSerial.flush();
+
+  attachInterrupt(digitalPinToInterrupt(SWITCH_FUNC_PIN), increment, CHANGE);
 }
 
 void loop() {
   
-  if(digitalRead(SWITCH_FUNC_PIN) != HIGH)
+  if(button_pressed == 0)
   {
     prncp_func1();
   }
 
-  else
+  else if(button_pressed == 1)
   {
     followLine();     // prncp_func2();
   }
+
+  else if(button_pressed == 2)
+   {
+    controller();
+   }
 
 }
 
@@ -128,7 +161,7 @@ void loop() {
  * speed.
  */
 void prncp_func1() {
-  Serial.println("testing");
+  //Serial.println("testing");
   scanningServo.write(90);
   set_motors(FORWARD);
 
@@ -194,7 +227,7 @@ void prncp_func1() {
       case LEFT:
         for (i = 0; i < F1_TURN_TIME; i++) {
           turn_robot(LEFT, TURN_SPEED);
-          if(digitalRead(SWITCH_FUNC_PIN) == HIGH)
+          if(button_pressed != 0)
           {
             return;
           }
@@ -203,7 +236,7 @@ void prncp_func1() {
       case RIGHT:
         for (i = 0; i < F1_TURN_TIME; i++) {
           turn_robot(RIGHT, TURN_SPEED);
-          if(digitalRead(SWITCH_FUNC_PIN) == HIGH)
+          if(button_pressed != 0)
           {
             return;
           }
@@ -215,7 +248,7 @@ void prncp_func1() {
         analogWrite(M1_SPEED_PIN, current_left_speed);
         analogWrite(M2_SPEED_PIN, current_right_speed);
         delay(1000);
-        if(digitalRead(SWITCH_FUNC_PIN) == HIGH)
+        if(button_pressed != 0)
          {
             return;
          }
@@ -716,3 +749,197 @@ void readSensor()
 
 }
 */
+
+
+void setupBlueToothConnection()
+{
+    blueToothSerial.begin(9600);  
+    blueToothSerial.print("AT");
+    delay(400); 
+  
+    blueToothSerial.print("AT+DEFAULT");             // Restore all setup value to factory setup
+    delay(2000); 
+  
+    blueToothSerial.print("AT+NAMESeeedMaster");    // set the bluetooth name as "SeeedMaster" ,the length of bluetooth name must less than 12 characters.
+    delay(400);
+  
+    blueToothSerial.print("AT+ROLEM");             // set the bluetooth work in slave mode
+    delay(400); 
+  
+  
+    blueToothSerial.print("AT+AUTH1");            
+    delay(400);    
+  
+    blueToothSerial.print("AT+CLEAR");             // Clear connected device mac address
+    delay(400);     
+    blueToothSerial.flush();
+  
+  
+}
+
+void increment(){
+button_pressed += 1;
+if(button_pressed > 2)
+  {
+    button_pressed = 0;
+  }
+}
+
+
+void controller() {
+if(blueToothSerial.available())
+{
+  
+  data = "";
+  recvChar = (byte)blueToothSerial.read();
+  Serial.println(recvChar);
+  data += recvChar;
+  if(data == "O")
+  {
+    movef = true;
+    movel = false;
+   mover = false;
+  }
+  else if (data == "F") {
+    movef = false;
+    movel = false;
+    mover = false;
+  }
+  else if (data == "L") {
+    movef = false;
+    movel = true;
+    mover = false;
+  }
+  else if (data == "R") {
+    movef = false;
+    movel = false;
+    mover = true;
+    
+  }
+ }
+
+  if(movef == true && movel == false && mover == false)
+  {
+    while(1)
+    {
+       if(blueToothSerial.available())
+        {
+          data = "";
+          recvChar = (byte)blueToothSerial.read();
+          data += recvChar;
+       
+       if(data == "F")
+        {
+          movef = false;
+          movel = false;
+          mover = false;
+          break;
+        }
+        else if(data == "L")
+        {
+          movef = false;
+          movel = true;
+          mover = false;
+          break;
+        }
+        else if(data == "R")
+        {
+          movef = false;
+          movel = false;
+          mover = true;
+          break;
+        }
+        }
+        move_forward(MAX_SPEED);
+        delay(100);
+    }
+  }
+
+  else if(movef == false && movel == true && mover == false)
+  {
+    while(1)
+    {
+       if(blueToothSerial.available())
+        {
+          data = "";
+          recvChar = (byte)blueToothSerial.read();
+          data += recvChar;
+       
+       if(data == "F")
+        {
+          movef = false;
+          movel = false;
+          mover = false;
+          break;
+        }
+
+        else if(data == "R")
+        {
+          movef = false;
+          movel = false;
+          mover = true;
+          break;
+        }
+        else if(data == "O")
+        {
+          movef = true;
+          movel = false;
+          mover = false;
+          break;
+        }
+        }
+        turn_robot(LEFT, TURN_SPEED);
+        //delay(100);
+    }
+  }
+
+  else if(movef == false && movel == false && mover == true)
+  {
+    while(1)
+    {
+       if(blueToothSerial.available())
+        {
+          data = "";
+          recvChar = (byte)blueToothSerial.read();
+          data += recvChar;
+       
+       if(data == "F")
+        {
+          movef = false;
+          movel = false;
+          mover = false;
+          break;
+        }
+        else if(data == "L")
+        {
+          movef = false;
+          movel = true;
+          mover = false;
+          break;
+        }
+        else if(data == "O")
+        {
+          movef = true;
+          movel = false;
+          mover = false;
+          break;
+        }
+      }
+        turn_robot(RIGHT, TURN_SPEED);
+        //delay(100);
+    }
+  }
+
+  else if (movef == false && movel == false && mover == false)
+  {
+    stop_motors();
+  }
+    
+  
+//turn_robot(LEFT, TURN_SPEED);
+  
+  //move_forward(MAX_SPEED/2);
+}
+
+
+
