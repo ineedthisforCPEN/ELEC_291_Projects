@@ -188,44 +188,71 @@
                 </div>
                 <div class="well well-sm">
                     <?php
-                        / $request = 'http://api.openweathermap.org/data/2.5/weather?q=Vancouver,can&appid=ce1664b9a59f64885ad5bcfc8ee4f1a4';
-                        // $response  = file_get_contents($request);
-                        // $jsonobj  = json_decode($response);
+                        //$request = 'http://api.openweathermap.org/data/2.5/weather?q=Vancouver,can&appid=ce1664b9a59f64885ad5bcfc8ee4f1a4';
+                        //$response  = file_get_contents($request);
+                        //$jsonobj  = json_decode($response, true);
+                        $jsonobj = json_decode('{"coord":{"lon":-123.12,"lat":49.25},"weather":[{"id":802,"main":"Clouds","description":"scattered clouds","icon":"03n"}],"base":"cmc stations","main":{"temp":280.45,"pressure":1017,"humidity":81,"temp_min":276.65,"temp_max":282.15},"wind":{"speed":6.7,"deg":210},"clouds":{"all":40},"dt":1459142270,"sys":{"type":1,"id":3359,"message":0.0136,"country":"CA","sunrise":1459173385,"sunset":1459219138},"id":6173331,"name":"Vancouver","cod":200}', true);
                         
-                        // $owmCity = $jsonobj['name'];
+                        $owmCity = $jsonobj['name'];
 
-                        // // coord objects
-                        // $owmLatitude = $jsonobj['coord']['lat'];
-                        // $owmLongitude = $jsonobj['coord']['lon'];
+                        // coord objects
+                        $owmLatitude = $jsonobj['coord']['lat'];
+                        $owmLongitude = $jsonobj['coord']['lon'];
 
-                        // // weather objects
-                        // $owmCondition = $jsonObj['weather'][0]['main'];
-                        // $owmConditionExtra = $jsonobj['weather'][0]['description'];
+                        // weather objects
+                        $owmCondition = $jsonobj['weather'][0]['main'];
+                        $owmConditionExtra = $jsonobj['weather'][0]['description'];
 
-                        // // main objects
-                        // $owmTemperature = $jsonObj['main']['temp'];
-                        // $owmPressure = $jsonobj['main']['pressure'];
-                        // $owmHumidity = $jsonobj['main']['humidity'];
-                        // $ownTempMin = $jsonobj['main']['temp_min'];
-                        // $ownTempMax = $jsonobj['main']['temp_max'];
-
-                        // // sys objects
-                        // $owmCountry = $jsonobj['sys']['country'];
-                        // $owmSunrise = $jsonobj['sys']['sunrise'];
-                        // $owmSunset = $jsonobj['sys']['sunset'];
+                        // main objects
+                        $owmTemperature = ($jsonobj['main']['temp'] - 273.15);
+                        $owmPressure = $jsonobj['main']['pressure'];
+                        $owmHumidity = $jsonobj['main']['humidity'];
+                        $owmTempMin = ($jsonobj['main']['temp_min'] - 273.15);
+                        $owmTempMax = ($jsonobj['main']['temp_max'] - 273.15);
+                        
+                        // sys objects
+                        $owmCountry = $jsonobj['sys']['country'];
+                        $owmSunrise = $jsonobj['sys']['sunrise'];
+                        $owmSunset = $jsonobj['sys']['sunset'];
                     ?>
-                    <h3 align="right" style="padding-right: 5%;"><?php echo "Hello"; ?>&#8451</h3>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p style="padding-left: 5%; font-size: 120%; color: #888888;"><small><?php echo "Max: " . $owmTempMax; ?>&#8451</small></p>
+                            <p style="padding-left: 5%; font-size: 120%; position: relative; bottom: 15px; color: #888888;"><small><?php echo "Min: " . $owmTempMin;  ?>&#8451</small></p>
+                        </div>
+                        <div class="col-md-8">
+                            <p align="right" style="padding-right: 5%; font-size: 350%;"><?php echo $owmTemperature; ?>&#8451</p>
+                            <p align="right" style="padding-right: 5%; font-size: 200%;"><?php echo $owmCondition; ?></p>
+                            <p align="right" class="under-right"><small><?php echo $owmConditionExtra; ?></small></p>
+                        </div>
+                    </div>
+                    <p style="padding-left: 5%; font-size: 180%;"><?php echo $owmCity; ?><small style="color: #888888;"><?php echo "\tCountry"; ?></small></p>
+                    <p class="under-left" style="font-size: 120%"><small><?php echo $owmLatitude . ", " . $owmLongitude; ?></small></p>
+                    <div class="panel-group">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">
+                                    <a data-toggle="collapse" href="#extraweatherinfo">Click For Extra Information</a>
+                                </h4>
+                            </div>
+                            <div id="extraweatherinfo" class="panel-collapse collapse">
+                                <div class="panel-body">Timezone:<span style="float: right;"><?php echo date('e'); ?></span></div>
+                                <div class="panel-body">Sunrise:<span style="float: right;"><?php echo date('h:i a', $owmSunrise); ?></span></div>
+                                <div class="panel-body">Sunset:<span style="float: right;"><?php echo date('h:i a', $owmSunset); ?></div>
+                                <div class="panel-body">Pressure:<span style="float: right;"><?php echo $owmPressure . " "; ?>kPa</span></div>
+                                <div class="panel-body">Humidity:<span style="float: right;"><?php echo $owmHumidity . " "; ?>%</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Section for local data -->
                 <div class="page-header">
-                    <h2>Indoor Temperature</h2>
+                    <h2>Mirror Measurements</h2>
                 </div>
                 <div class="well well-sm">
-                    <h4>Current Indoor Temperature</h4>
-                    <p align="right" style="padding-right: 5%;"><?php echo $indoorTemp; ?>&#8451</p>
-                    <h4>Current Indoor Humidity</h4>
-                    <p align="right" style="padding-right: 5%;"><?php echo $indoorHumi; ?></p>
+                    <h4>Current Indoor Temperature<small style="float: right;"><?php echo $indoorTemp; ?>&#8451</small></h4>
+                    <h4>Current Indoor Humidity<small style="float: right;"><?php echo $indoorHumi; ?>%</small></h4>
                 </div>
             </div>
 
