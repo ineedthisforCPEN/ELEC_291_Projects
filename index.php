@@ -26,116 +26,6 @@
 </head>
 <body>
     <!-- ==================================================================================================== -->
-    <!-- jQuery scripts used to run php scripts that change server files -->
-    <script>
-        // This is a helper function for updateArduino()
-        function timeOutput(time) {
-            if (time < 0) {                 // Return 0 if time is less than zero
-                return "0 seconds";
-            } else if (time > 24*3600) {    // Return max value if input is larger than one day
-                return "day";
-            } else {                        // Return time in minutes and seconds otherwise
-                var minutes = 0;
-                while (time > 60) {
-                    time -= 60;
-                    minutes++;
-                }
-                return "" + minutes + " minutes and " + time + " seconds";
-            }
-        }
-
-        // This function runs the php script rebootMirror.php, sends no parameters
-        function rebootMirror() {
-            $.ajax({
-                url: './phpscripts/rebootMirror.php',       // Location of php script
-                type: 'post',
-                success: function() {
-                    alert("Rebooting mirror. Please wait.");
-                }
-            });
-            return false;
-        }
-
-        // This function runs the php script refreshMirror.php, sends no parameters
-        function refreshMirror() {
-            $.ajax({
-                url: './phpscripts/refreshMirror.php'       // Location of php script
-                type: 'post',
-                success: function() {
-                    alert("Refreshing mirror. Please wait.");
-                }
-            });
-            return false;
-        }
-
-        // This function runs the php script updateArduino.php, sends parameter "updateTime"
-        function updateArduino(updateTime) {
-            $.ajax({
-                url: './phpscripts/updateArduino.php',      // Location of php script
-                data: {updateTime: 'updateTime'},           // What parameters to send
-                type: 'post',
-                success: function() {
-                    alert("Changed indoor temperature data to update once every "
-                        + timeOutput(updateTime)) + ".";
-                }
-            });
-            return false;
-        }
-
-        // This function runs the php script updateCompliments.php, sends parameter "updateTime"
-        function updateCompliments(updateTime) {
-            $.ajax({
-                url: './phpscripts/updateCompliments.php',  // Location of php script
-                data: {updateTime: 'updateTime'},           // What parameters to send
-                type: 'post',
-                success: function() {
-                    alert("Displaying random compliment once every "
-                        + timeOutput(updateTime)) + ".";
-                }
-            });
-            return false;
-        }
-
-        // This function runs updateTODOList.php, sends "status" and "toDo" parameters
-        function TODO(status, toDo) {
-            $.ajax({
-                url: './phpscripts/updateTODOList.php',     // Location of php script
-                data: {status: 'status', toDo: 'toDo'},     // What parameters to send
-                type: 'post',
-                success: function(output) {
-                    alert(output);
-                }
-            });
-            return false;
-        }
-
-        // This function runs addCompliment.php, sends parameter "compliment"
-        function addCompliment(compliment) {
-            $.ajax({
-                url: './phpscripts/addCompliment.php',      // Location of php script
-                data: {compliment: 'compliment'},           // What parameters to send
-                type: 'post',
-                success: function() {
-                    alert("Added \"" + compliment + "\" to compliment list.");
-                }
-            });
-            return false;
-        }
-
-        // This function runs removeCompliment.php, sends parameter "index"
-        function removeCompliment(index) {
-            $.ajax({
-                url: './phpscripts/removeCompliment.php',   // Location of php script
-                data: {action: 'test'},                     // What parameters to send
-                type: 'post',
-                success: function() {
-                    alert("Removed the seleted compliment.");
-                }
-            });
-            return false;
-        }
-    </script>
-    <!-- ==================================================================================================== -->
     <div class="container">
         <!-- ==================================================================================================== -->
         <div class="jumbotron">
@@ -153,17 +43,118 @@
             <p> Welcome to the smart mirror settings page. Here, you can see what data the smart mirror has received. You may also turn on or off mirror modules (e.g., you may turn off the TODO list if you wish).
             <p>Current Web Address: <kbd><?php echo $currentipv4; ?></kbd></p>
         </div>
+
+        <?php
+            // Helper function to display update times in minutes and seconds
+            function formatTime($toFormat) {
+                if ($toFormat < 0) {
+                    return "0 seconds";
+                } else if ($toFormat > 24*3600) {
+                    return "day";
+                } else if ($toFormat < 60) {
+                    return (string)$toFormat . " seconds";
+                } else {
+                    $numMins=0;
+                    while ($toFormat >= 60) {
+                        $numMins++;
+                        $toFormat-=60;
+                    }
+        
+                    if ($toFormat <= 0) {
+                        if ($numMins == 1) {
+                            return (string) "1 minute";
+                        }
+                        return (string)$numMins . " minutes";
+                    }
+
+                    if ($numMins == 1) {
+                            return (string) "1 minute and " . $toFormat . "seconds";
+                        }        
+                    return (string)$numMins . " minutes and " . $toFormat . " seconds";
+                }
+                return "";
+            }
+
+            // Get the func parameter from the address bar
+            $function = $_GET['func'];
+            $updatetime = $_GET['time'];
+
+            // Determine what to do with the func parameter
+            switch($function) {
+                case 'addcomp':
+                    echo "<div class=\"alert alert-success\">" .
+                         "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Added custom compliment to compliments list" .
+                         "</a></div>";
+                    break;
+                case 'remcomp':
+                    echo "<div class=\"alert alert-danger\">" .
+                         "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Removed compliment from compliments list" .
+                         "</a></div>";
+                    break;
+                case 'fintask':
+                    echo "<div class=\"alert alert-info\">" .
+                         "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Completed Selected Task" .
+                         "</a></div>";
+                    break;
+                case 'rsttask':
+                    echo "<div class=\"alert alert-info\">" .
+                         "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Reset Selected Task" .
+                         "</a></div>";
+                    break;
+                case 'addtask':
+                    echo "<div class=\"alert alert-info\">" .
+                         "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Added Task" .
+                         "</a></div>";
+                    break;
+                case 'remtask':
+                    echo "<div class=\"alert alert-info\">" .
+                         "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Removed Selected Task" .
+                         "</a></div>";
+                    break;
+                case 'itemp':
+                    // Write arduinoUpdate file
+                    $auFile = fopen("/var/www/html/updateTimes/arduinoUpdate.txt", "w") or die("Failed to change update time.<a onClick=\"location.href='../'\">Click here to go back</a>");
+                    fwrite($auFile, $updatetime);
+                    fclose($auFile);
+
+                    echo "<div class=\"alert alert-info\">" .
+                         "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Internal conditions will update once every " . formatTime($updatetime) .
+                         "</a></div>";
+                    break;
+                case 'ccomp':
+                    // Write arduinoUpdate file
+                    $coFile = fopen("/var/www/html/updateTimes/complimentUpdate.txt", "w") or die("Failed to change compliment change time.<a onClick=\"location.href='../'\">Click here to go back</a>");
+                    fwrite($coFile, $updatetime);
+                    fclose($coFile);
+
+                    echo "<div class=\"alert alert-info\">" .
+                         "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Compliments now change once every " . formatTime($updatetime) .
+                         "</a></div>";
+                    break;
+                default:
+                    break;
+            }
+        ?>
+
         <p style="color: #888888"><small>Try refreshing the page if you see something wrong. This might fix the problem.</small></p>
         <!-- ==================================================================================================== -->
         <div class="row">
             <div class="col-md-2">
-                <button class="btn btn-block btn-success" onclick="history.go(0)" id="refresh">Refresh Settings Page</button>
+                <button class="btn btn-block btn-success" onClick="location.href='../'">Refresh Settings Page</button>
             </div>
             <div class="col-md-2 col-md-offset-6">
-                <button class="btn btn-block btn-primary" onclick="refreshMirror()">Refresh Mirror</button>
+                <a href="?func=rfsmirror"><button class="btn btn-block btn-primary">Refresh Mirror</button></a>
             </div>
             <div class="col-md-2">
-                <button class="btn btn-primary btn-block" onclick="rebootMirror()">Reboot Mirror</button>
+                <a href="?func=rbtmirror"><button class="btn btn-primary btn-block" onclick="rebootMirror()">Reboot Mirror</button></a>
             </div>
         </div>
         <!-- ==================================================================================================== -->
@@ -268,9 +259,19 @@
                     <!-- Display every compliment in the compliments.txt file -->
                     <!-- Each compliment gets its own line -->
                     <?php
+                        // This code section is used to calculate how many lines are in compliments.txt
+                        // This is used to prevent the page from displaying an extra, empty checkbox
+                        $cfile = fopen("/var/www/html/compliments.txt", "r") or die("<p>-- You have no compliments --</p>");
+                        $numlines=0;
+                        while(! feof($cfile)) {
+                            fgets($cfile);
+                            $numlines++;
+                        }
+                        fclose($cfile);
+
                         $cfile = fopen("/var/www/html/compliments.txt", "r") or die("<p>-- You have no compliments --</p>");
                         $cindex = 0;
-                        while(! feof($cfile)) {
+                        while(--$numlines) {
                             echo "<p><input type=\"checkbox\" value=\"" . $cindex . "\"> " . fgets($cfile) . "</p>";     // Print next line of the file
                             $cindex++;
                         }
@@ -284,8 +285,8 @@
                     </div>
                 </div>
                 <div class="btn-group btn-group-justified">
-                    <div class="btn-group"><button class="btn btn-default"><a href="" onclick="addCompliment()">Add Custom Compliment</a></button></div>
-                    <div class="btn-group"><button class="btn btn-default"><a href="" onclick="removeCompliment()">Remove Selected Compliment</a></button></div>
+                    <div class="btn-group"><a href="?func=addcomp"><button class="btn btn-default">Add Custom Compliment</button></a></div>
+                    <div class="btn-group"><a href="?func=remcomp"><button class="btn btn-default">Remove Selected Compliment</button></a></div>
                 </div>
 
 
@@ -298,9 +299,19 @@
                     <!-- Every item gets its own line -->
                     <!-- Items that have been marked done are crossed through -->
                     <?php
+                        // This code section is used to calculate how many lines are in todolist.txt
+                        // This is used to prevent the page from displaying an extra, empty checkbox
+                        $tdfile = fopen("/var/www/html/todolist.txt", "r");
+                        $numlines=0;
+                        while(! feof($tdfile)) {
+                            fgets($tdfile);
+                            $numlines++;
+                        }
+                        fclose($tdfile);
+
                         $tdfile = fopen("/var/www/html/todolist.txt", "r");
                         $tdindex = 0;
-                        while (! feof($tdfile)) {
+                        while (--$numlines) {
                             $line = fgets($tdfile);
                             $linearray = explode(' ', trim($line));
                             $first = $linearray[0];
@@ -323,10 +334,10 @@
                     </div>
                 </div>
                 <div class="btn-group btn-group-justified">
-                    <div class="btn-group"><button class="btn btn-default"><a href="" onclick="TODO("finish")">Finished Task</a></button></div>
-                    <div class="btn-group"><button class="btn btn-default"><a href="" onclick="TODO("unfinish")">Reset Task</a></button></div>
-                    <div class="btn-group"><button class="btn btn-default"><a href="" onclick="TODO("add")">Add Task</a></button></div>
-                    <div class="btn-group"><button class="btn btn-default"><a href="" onclick="TODO("remove")">Remove Task</a></button></div>
+                    <div class="btn-group"><a href="?func=fintask"><button class="btn btn-default">Finished Task</button></a></div>
+                    <div class="btn-group"><a href="?func=rsttask"><button class="btn btn-default">Reset Task</button></a></div>
+                    <div class="btn-group"><a href="?func=addtask"><button class="btn btn-default">Add Task</button></a></div>
+                    <div class="btn-group"><a href="?func=remtask"><button class="btn btn-default">Remove Task</button></a></div>
                 </div>
             </div>
 
@@ -359,12 +370,12 @@
                     <div class="btn-group">
                         <button class="btn btn-default dropdown-toggle btn-block" data-toggle="dropdown">Indoor Temperature <span class="caret"></span></button>
                         <ul class="dropdown-menu" role="menu">
-                            <li><a href="" onclick="updateArduino(30)">30 seconds</a></li>
-                            <li><a href="" onclick="updateArduino(60)">1 minute</a></li>
-                            <li><a href="" onclick="updateArduino(120)">2 minutes</a></li>
-                            <li><a href="" onclick="updateArduino(180)">3 minutes</a></li>
-                            <li><a href="" onclick="updateArduino(240)">4 minutes</a></li>
-                            <li><a href="" onclick="updateArduino(300)">5 minutes</a></li>
+                            <li><a href="?func=itemp&time=30" >30 seconds</a></li>
+                            <li><a href="?func=itemp&time=60" >1 minute</a></li>
+                            <li><a href="?func=itemp&time=120">2 minutes</a></li>
+                            <li><a href="?func=itemp&time=180">3 minutes</a></li>
+                            <li><a href="?func=itemp&time=240">4 minutes</a></li>
+                            <li><a href="?func=itemp&time=300">5 minutes</a></li>
                         </ul>
                     </div>
 
@@ -372,13 +383,13 @@
                     <div class="btn-group">
                         <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">Change Compliments <span class="caret"></span></button>
                         <ul class="dropdown-menu" role="menu">
-                            <li><a href="" onclick="updateCompliments(60)">1 minute</a></li>
-                            <li><a href="" onclick="updateCompliments(60)">2 minute</a></li>
-                            <li><a href="" onclick="updateCompliments(60)">3 minute</a></li>
-                            <li><a href="" onclick="updateCompliments(60)">4 minute</a></li>
-                            <li><a href="" onclick="updateCompliments(60)">5 minute</a></li>
-                            <li><a href="" onclick="updateCompliments(60)">10 minute</a></li>
-                            <li><a href="" onclick="updateCompliments(60)">15 minute</a></li>
+                            <li><a href="?func=ccomp&time=60" >1 minute</a></li>
+                            <li><a href="?func=ccomp&time=120">2 minutes</a></li>
+                            <li><a href="?func=ccomp&time=180">3 minutes</a></li>
+                            <li><a href="?func=ccomp&time=240">4 minutes</a></li>
+                            <li><a href="?func=ccomp&time=300">5 minutes</a></li>
+                            <li><a href="?func=ccomp&time=600">10 minutes</a></li>
+                            <li><a href="?func=ccomp&time=900">15 minutes</a></li>
                         </ul>
                     </div>
             </div>
@@ -391,10 +402,10 @@
             <button class="btn btn-block btn-success" onclick="history.go(0)" id="refresh">Refresh Settings Page</button>
         </div>
         <div class="col-md-2 col-md-offset-6">
-            <button class="btn btn-block btn-primary" onclick="refreshMirror()">Refresh Mirror</button>
+            <a href="?func=rfsmirror"><button class="btn btn-block btn-primary">Refresh Mirror</button></a>
         </div>
         <div class="col-md-2">
-            <button class="btn btn-primary btn-block" onclick="rebootMirror()">Reboot Mirror</button>
+            <a href="?func=rbtmirror"><button class="btn btn-primary btn-block" onclick="rebootMirror()">Reboot Mirror</button></a>
         </div>
     </div>
     <!-- ==================================================================================================== -->
