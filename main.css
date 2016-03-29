@@ -1,11 +1,15 @@
-body {
-	background-color: #3399ff;
+p.under-right {
+	padding-right: 5%;
+	font-size: 180%;
+	position: relative;
+	bottom: 20px;
+	color: #888888;
 }
 
-h1, h2, h3 {
-	color: #efefff;
-}
-
-p {
-	color: #eeeeff;
+p.under-left {
+	padding-left: 5%;
+	font-size: 180%;
+	position: relative;
+	bottom: 20px;
+	color: #888888;
 }
