@@ -384,31 +384,29 @@
                             }
                             fclose($msfile);
 
-                            print_r($modArray);
-
                             // Display checkbox for time module
                             echo "<p><input type='checkbox' name='module[]' value='time'";
-                            if (in_array('time', $modArray)) { echo " checked='' "; }
+                            if (in_array("time\n", $modArray)) { echo " checked='' "; }
                             echo "> <b>Time</b> <small>Module</small></p>";
 
                             // Display checkbox for indoor conditions module
                             echo "<p><input type='checkbox' name='module[]' value='itemp'";
-                            if (in_array('itemp', $modArray)) { echo " checked='' "; }
+                            if (in_array("itemp\n", $modArray)) { echo " checked='' "; }
                             echo "> <b>Indoor Conditions</b> <small>Module</small></p>";
 
                             // Display checkbox for time module
                             echo "<p><input type='checkbox' name='module[]' value='weather'";
-                            if (in_array('weather', $modArray)) { echo " checked='' "; }
+                            if (in_array("weather\n", $modArray)) { echo " checked='' "; }
                             echo "> <b>Weather</b> <small>Module</small></p>";
 
                             // Display checkbox for time module
                             echo "<p><input type='checkbox' name='module[]' value='todo'";
-                            if (in_array('todo', $modArray)) { echo " checked='' "; }
+                            if (in_array("todo\n", $modArray)) { echo " checked='' "; }
                             echo "> <b>Todo</b> <small>Module</small></p>";
 
                             // Display checkbox for time module
                             echo "<p><input type='checkbox' name='module[]' value='compliments'";
-                            if (in_array('compliments', $modArray)) { echo " checked='' "; }
+                            if (in_array("compliments\n", $modArray)) { echo " checked='' "; }
                             echo "> <b>Compliments</b> <small>Module</small></p>";
                         ?>
                         <p><input type="submit" name="moduleSelect" value="submit"/></p>
