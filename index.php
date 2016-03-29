@@ -81,6 +81,28 @@
 
             // Determine what to do with the func parameter
             switch($function) {
+                case 'rbtmirror':
+                    // Create file used as a flag
+                    // If the file exists, the mirror will reboot
+                    $rbtfile = fopen("/var/www/html/rbtflag", "w") or die("Error rebooting mirror. <a onClick=\"location.href='../'\">Click here to go back</a>");
+                    fclose($rbtfile);
+
+                    echo "<div class=\"alert alert-danger\">" .
+                         "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Rebooting mirror - this might take some time..." .
+                         "</a></div>";
+                    break;
+                case 'rfsmirror':
+                    // Create file used as a flag
+                    // If the file exists, the mirror will refresh
+                    $rfsfile = fopen("/var/www/html/rfsflag", "w") or die("Error refreshing mirror. <a onClick=\"location.href='../'\">Click here to go back</a>");
+
+                    echo "<div class=\"alert alert-warning\">" .
+                         "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Refreshing mirror..." .
+                         "</a></div>";
+
+                    break;
                 case 'addcomp':
                     echo "<div class=\"alert alert-success\">" .
                          "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
@@ -349,14 +371,47 @@
                 <div class="page-header">
                     <h2>Modules Displayed</h2>
                 </div>
-                <span class="label label-warning">Requires Mirror Refresh or Reboot</span>
+                <span class="label label-warning">Requires Mirror Refresh</span>
                 <div class="well well-sm">
-                    <form>
-                        <p><input type="checkbox" value="time"> <b>Time</b> <small>Module</small></p>
-                        <p><input type="checkbox" value="itemp"> <b>Indoor Temperatue</b> <small>Module</small></p>
-                        <p><input type="checkbox" value="weather"> <b>Weather</b> <small>Module</small></p>
-                        <p><input type="checkbox" value="todo"> <b>Todo</b> <small>Module</small></p>
-                        <p><input type="checkbox" value="compliments"> <b>Compliments</b> <small>Module</small></p>
+                    <form action="moduleSelect.php" method="post">
+                        <?php
+                            $msfile=fopen("/var/www/html/moduleSelect.txt", "r") or die("Error loading modules. <a onClick=\"location.href='../'\">Click here to go back</a>");
+                            $modArray=array();
+
+                            while(!feof($msfile)) {
+                                $line=fgets($msfile);
+                                $modArray[]=$line;
+                            }
+                            fclose($msfile);
+
+                            print_r($modArray);
+
+                            // Display checkbox for time module
+                            echo "<p><input type='checkbox' name='module[]' value='time'";
+                            if (in_array('time', $modArray)) { echo " checked='' "; }
+                            echo "> <b>Time</b> <small>Module</small></p>";
+
+                            // Display checkbox for indoor conditions module
+                            echo "<p><input type='checkbox' name='module[]' value='itemp'";
+                            if (in_array('itemp', $modArray)) { echo " checked='' "; }
+                            echo "> <b>Indoor Conditions</b> <small>Module</small></p>";
+
+                            // Display checkbox for time module
+                            echo "<p><input type='checkbox' name='module[]' value='weather'";
+                            if (in_array('weather', $modArray)) { echo " checked='' "; }
+                            echo "> <b>Weather</b> <small>Module</small></p>";
+
+                            // Display checkbox for time module
+                            echo "<p><input type='checkbox' name='module[]' value='todo'";
+                            if (in_array('todo', $modArray)) { echo " checked='' "; }
+                            echo "> <b>Todo</b> <small>Module</small></p>";
+
+                            // Display checkbox for time module
+                            echo "<p><input type='checkbox' name='module[]' value='compliments'";
+                            if (in_array('compliments', $modArray)) { echo " checked='' "; }
+                            echo "> <b>Compliments</b> <small>Module</small></p>";
+                        ?>
+                        <p><input type="submit" name="moduleSelect" value="submit"/></p>
                     </form>
                 </div>
 
