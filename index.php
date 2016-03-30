@@ -34,14 +34,14 @@
             This reads the website address
             -->
              <?php
-                $ipv4file = fopen("/var/www/html/ip.txt", "r") or die("xxx.xxx.xxx.xxx");
-                $currentipv4 = fread($ipv4file,filesize("/var/www/html/ip.txt"));
+                $ipv4file = fopen("/var/www/wwwdata/ip.txt", "r") or die("xxx.xxx.xxx.xxx");
+                $currentipv4 = fgets($ipv4file);
                 fclose($ipv4file);
             ?> 
 
             <h1>Smart Mirror Settings</h1>
             <p> Welcome to the smart mirror settings page. Here, you can see what data the smart mirror has received. You may also turn on or off mirror modules (e.g., you may turn off the TODO list if you wish).
-            <p>Current Web Address: <kbd><?php echo $currentipv4; ?></kbd></p>
+            <p>Current Web Address: <kbd><?php echo $currentipv4;?></kbd></p>
         </div>
 
         <?php
@@ -85,23 +85,20 @@
                 case 'rbtmirror':
                     // Create file used as a flag
                     // If the file exists, the mirror will reboot
-                    $rbtfile = fopen("/var/www/html/rbtflag", "w") or die("Error rebooting mirror. <a onClick=\"location.href='../'\">Click here to go back</a>");
+                    $rbtfile = fopen("/var/www/wwwdata/rbtflag", "w") or die("Error rebooting mirror. <a onClick=\"location.href='../'\">Click here to go back</a>");
                     fclose($rbtfile);
 
-                    echo "<div class=\"alert alert-danger\">" .
-                         "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
-                         "Rebooting mirror - this might take some time..." .
-                         "</a></div>";
+                    echo "<div class=\"alert alert-warning\"><a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Rebooting mirror - this might take some time...</a></div>";
                     break;
                 case 'rfsmirror':
                     // Create file used as a flag
                     // If the file exists, the mirror will refresh
-                    $rfsfile = fopen("/var/www/html/rfsflag", "w") or die("Error refreshing mirror. <a onClick=\"location.href='../'\">Click here to go back</a>");
+                    $rfsfile = fopen("/var/www/wwwdata/rfsflag", "w") or die("Error refreshing mirror. <a onClick=\"location.href='../'\">Click here to go back</a>");
+                    fclose($rfsfile);
 
-                    echo "<div class=\"alert alert-warning\">" .
-                         "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
-                         "Refreshing mirror..." .
-                         "</a></div>";
+                    echo "<div class=\"alert alert-warning\"><a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Refreshing mirror - this might take some time...</a></div>";
 
                     break;
                 case 'addcomp':
@@ -153,26 +150,27 @@
                          "Failed to remove task - no task selected</a></div>";
                     break;
                 case 'itemp':
+                    // Make sure only acceptable values are input (this prevents users from inputting unreasonable values in the address bar)
+                    if($updatetime % 30 != 0) { break; }
                     // Write arduinoUpdate file
-                    $auFile = fopen("/var/www/html/updateTimes/arduinoUpdate.txt", "w") or die("Failed to change update time.<a onClick=\"location.href='../'\">Click here to go back</a>");
+                    $auFile = fopen("/var/www/wwwdata/update_times/arduino_update.txt", "w") or die("Failed to change update time.<a onClick=\"location.href='../'\">Click here to go back</a>");
                     fwrite($auFile, $updatetime);
                     fclose($auFile);
 
-                    echo "<div class=\"alert alert-info\">" .
-                         "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
-                         "Internal conditions will update once every " . formatTime($updatetime) .
-                         "</a></div>";
+                    echo "<div class=\"alert alert-info\"><a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Internal conditions will update once every " . formatTime($updatetime) . " - this will take effect after mirror reboot</a></div>";
                     break;
                 case 'ccomp':
+                    // Make sure only acceptable values are input (this prevents users from inputting unreasonable values in the address bar)
+                    if($updatetime % 30 != 0) { break; }
+
                     // Write arduinoUpdate file
-                    $coFile = fopen("/var/www/html/updateTimes/complimentUpdate.txt", "w") or die("Failed to change compliment change time.<a onClick=\"location.href='../'\">Click here to go back</a>");
+                    $coFile = fopen("/var/www/wwwdata/update_times/compliment_update.txt", "w") or die("Failed to change compliment change time.<a onClick=\"location.href='../'\">Click here to go back</a>");
                     fwrite($coFile, $updatetime);
                     fclose($coFile);
 
-                    echo "<div class=\"alert alert-info\">" .
-                         "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
-                         "Compliments now change once every " . formatTime($updatetime) .
-                         "</a></div>";
+                    echo "<div class=\"alert alert-info\"><a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Compliments now change once every " . formatTime($updatetime) . " - this will take effect after mirror reboot</a></div>";
                     break;
                 default:
                     break;
@@ -200,8 +198,8 @@
             <div class="col-md-4">
                 <!-- This script gathers information from the arduino -->
                 <?php
-                    $tfile = fopen("/var/www/html/temperature.txt", "r") or die("--");  // Open temperature file
-                    $hfile = fopen("/var/www/html/humidity.txt", "r") or die("--");     // Open humidity file
+                    $tfile = fopen("/var/www/wwwdata/temperature.txt", "r") or die("--");  // Open temperature file
+                    $hfile = fopen("/var/www/wwwdata/humidity.txt", "r") or die("--");     // Open humidity file
                     $indoorTemp = fgets($tfile);                                        // Read line from temperature file
                     $indoorHumi = fgets($hfile);                                        // Read line form humidity file
                     fclose($tfile);                                                     // Close temperature file
@@ -297,7 +295,7 @@
                         <?php
                             // This code section is used to calculate how many lines are in compliments.txt
                             // This is used to prevent the page from displaying an extra, empty checkbox
-                            $cfile = fopen("/var/www/html/compliments.txt", "r") or die("<p>-- You have no compliments --</p>");
+                            $cfile = fopen("/var/www/wwwdata/compliment_list.txt", "r") or die("<p>-- You have no compliments --</p>");
                             $numlines=0;
                             while(! feof($cfile)) {
                                 fgets($cfile);
@@ -305,7 +303,7 @@
                             }
                             fclose($cfile);
 
-                            $cfile = fopen("/var/www/html/compliments.txt", "r") or die("<p>-- You have no compliments --</p>");
+                            $cfile = fopen("/var/www/wwwdata/compliment_list.txt", "r") or die("<p>-- You have no compliments --</p>");
                             $cindex = 1;
                             while(--$numlines) {
                                 echo "<div class='radio'><label><input type='radio' name='item' value='" . $cindex . "''> " . fgets($cfile) . "</label></div>";
@@ -338,7 +336,7 @@
                         <?php
                             // This code section is used to calculate how many lines are in todolist.txt
                             // This is used to prevent the page from displaying an extra, empty checkbox
-                            $tdfile = fopen("/var/www/html/todolist.txt", "r");
+                            $tdfile = fopen("/var/www/wwwdata/todo_list.txt", "r");
                             $numlines=0;
                             while(! feof($tdfile)) {
                                 fgets($tdfile);
@@ -346,7 +344,7 @@
                             }
                             fclose($tdfile);
 
-                            $tdfile = fopen("/var/www/html/todolist.txt", "r");
+                            $tdfile = fopen("/var/www/wwwdata/todo_list.txt", "r");
                             $tdindex = 1;
                             while (--$numlines) {
                                 $line = fgets($tdfile);
@@ -390,7 +388,7 @@
                 <div class="well well-sm">
                     <form action="moduleSelect.php" method="post">
                         <?php
-                            $msfile=fopen("/var/www/html/moduleSelect.txt", "r") or die("Error loading modules. <a onClick=\"location.href='../'\">Click here to go back</a>");
+                            $msfile=fopen("/var/www/wwwdata/module_select.txt", "r") or die("Error loading modules. <a onClick=\"location.href='../'\">Click here to go back</a>");
                             $modArray=array();
 
                             while(!feof($msfile)) {
@@ -425,7 +423,7 @@
                             if (in_array("compliments\n", $modArray)) { echo " checked='' "; }
                             echo "> <b>Compliments</b> <small>Module</small></p>";
                         ?>
-                        <p><input type="submit" name="moduleSelect" value="submit"/></p>
+                        <button type="submit" class="btn btn-default btn-block">Refresh Mirror</button>
                     </form>
                 </div>
 

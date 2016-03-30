@@ -25,7 +25,7 @@ if(empty($func)) { goback(); }
 // Not memory efficient, but todolist file is not expected to be large
 // This is done to presever file content as writing erases the file
 // Appending to the file would not always produce wanted results, hence "w" and not "w+"
-$tdfile=fopen("/var/www/html/todolist.txt", "r") or die("Error opening todo list");
+$tdfile=fopen("/var/www/wwwdata/todo_list.txt", "r") or die("Error opening todo list");
 $tdArray=array();
 while(!feof($tdfile)) {
 	$tdArray[]=fgets($tdfile);
@@ -34,7 +34,7 @@ fclose($tdfile);
 
 // Open todolist list for writing
 // This erases todolist.txt
-$tdfile=fopen("/var/www/html/todolist.txt", "w") or die("Error opening todo list");
+$tdfile=fopen("/var/www/wwwdata/todo_list.txt", "w") or die("Error opening todo list");
 
 // Used to generate labels on homepage return
 $retStatus="";

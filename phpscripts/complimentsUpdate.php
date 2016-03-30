@@ -19,14 +19,14 @@ $text=$_POST['text'];
 
 if(empty(func)) { goback(); }
 
-$cfile=fopen("/var/www/html/compliments.txt", "r");
+$cfile=fopen("/var/www/wwwdata/compliment_list.txt", "r");
 $cArray=array();
 while(!feof($cfile)) {
 	$cArray[]=fgets($cfile);
 }
 fclose($cfile);
 
-$cfile=fopen("/var/www/html/compliments.txt", "w");
+$cfile=fopen("/var/www/wwwdata/compliment_list.txt", "w");
 $retStatus="";
 
 switch($func) {
