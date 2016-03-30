@@ -316,51 +316,52 @@
                 <div class="page-header">
                     <h2>TODO List</h2>
                 </div>
-                <div class="well well-sm">
-                    <!-- Display every todo item in the todolist.txt file -->
-                    <!-- Every item gets its own line -->
-                    <!-- Items that have been marked done are crossed through -->
-                    <?php
-                        // This code section is used to calculate how many lines are in todolist.txt
-                        // This is used to prevent the page from displaying an extra, empty checkbox
-                        $tdfile = fopen("/var/www/html/todolist.txt", "r");
-                        $numlines=0;
-                        while(! feof($tdfile)) {
-                            fgets($tdfile);
-                            $numlines++;
-                        }
-                        fclose($tdfile);
-
-                        $tdfile = fopen("/var/www/html/todolist.txt", "r");
-                        $tdindex = 0;
-                        while (--$numlines) {
-                            $line = fgets($tdfile);
-                            $linearray = explode(' ', trim($line));
-                            $first = $linearray[0];
-                            $rest = substr(strstr($line, ' '), 4);
-                            $tdindex = 0;
-                            if (strcmp($first, "todo") == 0) {
-                                echo "<p><input type=\"checkbox\" value=\"" . $tdindex . "\"> " . $rest . "</p>";
-                            } else {
-                                echo "<p><input type=\"checkbox\" value=\"" . $tdindex . "\"><del> " . $rest . "</del></s>";
+                <!-- Display every todo item in the todolist.txt file -->
+                <!-- Every item gets its own line -->
+                <!-- Items that have been marked done are crossed through -->
+                <form action="todoUpdate.php" method="post">
+                    <div class="well well-sm">
+                        <?php
+                            // This code section is used to calculate how many lines are in todolist.txt
+                            // This is used to prevent the page from displaying an extra, empty checkbox
+                            $tdfile = fopen("/var/www/html/todolist.txt", "r");
+                            $numlines=0;
+                            while(! feof($tdfile)) {
+                                fgets($tdfile);
+                                $numlines++;
                             }
-                            $tdindex++;
-                        }
-                        fclose($tdfile);
-                    ?>
-                </div>
-                <div class="well well-sm">
-                    <div class="form-group">
-                        <label for="Todo">Your TODO Item:</label>
-                        <input type="Todo" class="form-control" id="Todo">
+                            fclose($tdfile);
+
+                            $tdfile = fopen("/var/www/html/todolist.txt", "r");
+                            $tdindex = 1;
+                            while (--$numlines) {
+                                $line = fgets($tdfile);
+                                $linearray = explode(' ', trim($line));
+                                $first = $linearray[0];
+                                $rest = substr(strstr($line, ' '), 4);
+                                if (strcmp($first, "todo") == 0) {
+                                    echo "<div class='radio'><label><input type='radio' name='todo' value='" . $tdindex . "'> " . $rest . "</label></div>";
+                                } else {
+                                    echo "<div class='radio'><label><input type='radio' name='todo' value='" . $tdindex . "'><del> " . $rest . "</del></label></div>";
+                                }
+                                $tdindex++;
+                            }
+                            fclose($tdfile);
+                        ?>
                     </div>
-                </div>
-                <div class="btn-group btn-group-justified">
-                    <div class="btn-group"><a href="?func=fintask"><button class="btn btn-default">Finished Task</button></a></div>
-                    <div class="btn-group"><a href="?func=rsttask"><button class="btn btn-default">Reset Task</button></a></div>
-                    <div class="btn-group"><a href="?func=addtask"><button class="btn btn-default">Add Task</button></a></div>
-                    <div class="btn-group"><a href="?func=remtask"><button class="btn btn-default">Remove Task</button></a></div>
-                </div>
+                    <div class="well well-sm">
+                        <div class="form-group">
+                            <label for="Todo">Your TODO Item:</label>
+                            <input type="text" class="form-control" name="text">
+                        </div>
+                    </div>
+                    <div class="btn-group btn-group-justified">
+                        <div class='btn-group'><a href='todoUpdate.php'><button type="submit" name="func" value="fin" class="btn btn-default">Finished Task</button></a></div>
+                        <div class='btn-group'><a href='todoUpdate.php'><button type="submit" name="func" value="rst" class="btn btn-default">Reset Task</button></a></div>
+                        <div class='btn-group'><a href='todoUpdate.php'><button type="submit" name="func" value="add" class="btn btn-default">Add Task</button></a></div>
+                        <div class='btn-group'><a href='todoUpdate.php'><button type="submit" name="func" value="rem" class="btn btn-default">Remove Task</button></a></div>
+                    </div>
+                </form>
             </div>
 
             <!-- ==================================================================================================== -->
@@ -371,7 +372,7 @@
                 <div class="page-header">
                     <h2>Modules Displayed</h2>
                 </div>
-                <span class="label label-warning">Requires Mirror Refresh</span>
+                <span class="label label-warning">Requires Mirror Refresh</span>2
                 <div class="well well-sm">
                     <form action="moduleSelect.php" method="post">
                         <?php
@@ -382,6 +383,7 @@
                                 $line=fgets($msfile);
                                 $modArray[]=$line;
                             }
+                            
                             fclose($msfile);
 
                             // Display checkbox for time module
