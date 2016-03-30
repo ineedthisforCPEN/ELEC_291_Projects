@@ -78,6 +78,7 @@
             // Get the func parameter from the address bar
             $function = $_GET['func'];
             $updatetime = $_GET['time'];
+            $text = $_GET['text'];
 
             // Determine what to do with the func parameter
             switch($function) {
@@ -104,40 +105,52 @@
 
                     break;
                 case 'addcomp':
-                    echo "<div class=\"alert alert-success\">" .
-                         "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
-                         "Added custom compliment to compliments list" .
-                         "</a></div>";
+                    echo "<div class=\"alert alert-success\"><a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Added \"" . $text . "\" to compliments list</a></div>";
+                    break;
+                case 'addcompfail':
+                    echo "<div class=\"alert alert-danger\"><a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Failed to add compliment to compliments list - no compliment written in text box</a></div>";
                     break;
                 case 'remcomp':
-                    echo "<div class=\"alert alert-danger\">" .
-                         "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
-                         "Removed compliment from compliments list" .
-                         "</a></div>";
+                    echo "<div class=\"alert alert-success\"><a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Removed \"" . $text . "\" from compliments list</a></div>";
+                    break;
+                case 'remcompfail':
+                    echo "<div class=\"alert alert-danger\"><a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Failed to remove compliment from compliments list - no compliment selected</a></div>";
                     break;
                 case 'fintask':
-                    echo "<div class=\"alert alert-info\">" .
-                         "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
-                         "Completed Selected Task" .
-                         "</a></div>";
+                    echo "<div class=\"alert alert-success\"><a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Completed Task \"" . $text . "\"</a></div>";
+                    break;
+                case 'fintaskfail':
+                    echo "<div class=\"alert alert-danger\"><a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Failed to complete task - no task selected</a></div>";
                     break;
                 case 'rsttask':
-                    echo "<div class=\"alert alert-info\">" .
-                         "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
-                         "Reset Selected Task" .
-                         "</a></div>";
+                    echo "<div class=\"alert alert-success\"><a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Reset Task \"" . $text . "\"</a></div>";
+                    break;
+                case 'rsttaskfail':
+                    echo "<div class=\"alert alert-danger\"><a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Failed to reset task - no task selected</a></div>";
                     break;
                 case 'addtask':
-                    echo "<div class=\"alert alert-info\">" .
-                         "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
-                         "Added Task" .
-                         "</a></div>";
+                    echo "<div class=\"alert alert-success\"><a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Added Task \"" . $text . "\"</a></div>";
+                    break;
+                case 'addtaskfail':
+                    echo "<div class=\"alert alert-danger\"><a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Failed to add task - no task written in text box</a></div>";
                     break;
                 case 'remtask':
-                    echo "<div class=\"alert alert-info\">" .
-                         "<a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
-                         "Removed Selected Task" .
-                         "</a></div>";
+                    echo "<div class=\"alert alert-success\"><a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Removed Task \"" . $text . "\"</a></div>";
+                    break;
+                case 'remtaskfail':
+                    echo "<div class=\"alert alert-danger\"><a href=\"#\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\" onClick=\"location.href='../'\">&times;</a>" .
+                         "Failed to remove task - no task selected</a></div>";
                     break;
                 case 'itemp':
                     // Write arduinoUpdate file
@@ -277,40 +290,41 @@
                 <div class="page-header">
                     <h2>List of Compliments</h2>
                 </div>
-                <div class="well well-sm">
-                    <!-- Display every compliment in the compliments.txt file -->
-                    <!-- Each compliment gets its own line -->
-                    <?php
-                        // This code section is used to calculate how many lines are in compliments.txt
-                        // This is used to prevent the page from displaying an extra, empty checkbox
-                        $cfile = fopen("/var/www/html/compliments.txt", "r") or die("<p>-- You have no compliments --</p>");
-                        $numlines=0;
-                        while(! feof($cfile)) {
-                            fgets($cfile);
-                            $numlines++;
-                        }
-                        fclose($cfile);
+                <form action="complimentsUpdate.php" method="post">
+                    <div class="well well-sm">
+                        <!-- Display every compliment in the compliments.txt file -->
+                        <!-- Each compliment gets its own line -->
+                        <?php
+                            // This code section is used to calculate how many lines are in compliments.txt
+                            // This is used to prevent the page from displaying an extra, empty checkbox
+                            $cfile = fopen("/var/www/html/compliments.txt", "r") or die("<p>-- You have no compliments --</p>");
+                            $numlines=0;
+                            while(! feof($cfile)) {
+                                fgets($cfile);
+                                $numlines++;
+                            }
+                            fclose($cfile);
 
-                        $cfile = fopen("/var/www/html/compliments.txt", "r") or die("<p>-- You have no compliments --</p>");
-                        $cindex = 0;
-                        while(--$numlines) {
-                            echo "<p><input type=\"checkbox\" value=\"" . $cindex . "\"> " . fgets($cfile) . "</p>";     // Print next line of the file
-                            $cindex++;
-                        }
-                        fclose($cfile);
-                    ?>
-                </div>
-                <div class="well well-sm">
-                    <div class="form-group">
-                        <label for="Compliment">Your Compliment:</label>
-                        <input type="Compliment" class="form-control" id="Compliment">
+                            $cfile = fopen("/var/www/html/compliments.txt", "r") or die("<p>-- You have no compliments --</p>");
+                            $cindex = 1;
+                            while(--$numlines) {
+                                echo "<div class='radio'><label><input type='radio' name='item' value='" . $cindex . "''> " . fgets($cfile) . "</label></div>";
+                                $cindex++;
+                            }
+                            fclose($cfile);
+                        ?>
                     </div>
-                </div>
-                <div class="btn-group btn-group-justified">
-                    <div class="btn-group"><a href="?func=addcomp"><button class="btn btn-default">Add Custom Compliment</button></a></div>
-                    <div class="btn-group"><a href="?func=remcomp"><button class="btn btn-default">Remove Selected Compliment</button></a></div>
-                </div>
-
+                    <div class="well well-sm">
+                        <div class="form-group">
+                            <label for="Compliment">Your Compliment:</label>
+                            <input type="text" class="form-control" name="text">
+                        </div>
+                    </div>
+                    <div class="btn-group btn-group-justified">
+                        <div class="btn-group"><button type="submit" name="func" value="add" class="btn btn-default">Add Custom Compliment</button></div>
+                        <div class="btn-group"><button type="submit" name="func" value="rem" class="btn btn-default">Remove Selected Compliment</button></div>
+                    </div>
+                </form>
 
                 <!-- One section for the todo list -->
                 <div class="page-header">
@@ -340,9 +354,9 @@
                                 $first = $linearray[0];
                                 $rest = substr(strstr($line, ' '), 4);
                                 if (strcmp($first, "todo") == 0) {
-                                    echo "<div class='radio'><label><input type='radio' name='todo' value='" . $tdindex . "'> " . $rest . "</label></div>";
+                                    echo "<div class='radio'><label><input type='radio' name='item' value='" . $tdindex . "'> " . $rest . "</label></div>";
                                 } else {
-                                    echo "<div class='radio'><label><input type='radio' name='todo' value='" . $tdindex . "'><del> " . $rest . "</del></label></div>";
+                                    echo "<div class='radio'><label><input type='radio' name='item' value='" . $tdindex . "'><del> " . $rest . "</del></label></div>";
                                 }
                                 $tdindex++;
                             }
@@ -356,10 +370,10 @@
                         </div>
                     </div>
                     <div class="btn-group btn-group-justified">
-                        <div class='btn-group'><a href='todoUpdate.php'><button type="submit" name="func" value="fin" class="btn btn-default">Finished Task</button></a></div>
-                        <div class='btn-group'><a href='todoUpdate.php'><button type="submit" name="func" value="rst" class="btn btn-default">Reset Task</button></a></div>
-                        <div class='btn-group'><a href='todoUpdate.php'><button type="submit" name="func" value="add" class="btn btn-default">Add Task</button></a></div>
-                        <div class='btn-group'><a href='todoUpdate.php'><button type="submit" name="func" value="rem" class="btn btn-default">Remove Task</button></a></div>
+                        <div class='btn-group'><button type="submit" name="func" value="fin" class="btn btn-default">Complete Task</button></div>
+                        <div class='btn-group'><button type="submit" name="func" value="rst" class="btn btn-default">Reset Task</button></div>
+                        <div class='btn-group'><button type="submit" name="func" value="add" class="btn btn-default">Add Task</button></div>
+                        <div class='btn-group'><button type="submit" name="func" value="rem" class="btn btn-default">Remove Task</button></div>
                     </div>
                 </form>
             </div>
@@ -372,7 +386,7 @@
                 <div class="page-header">
                     <h2>Modules Displayed</h2>
                 </div>
-                <span class="label label-warning">Requires Mirror Refresh</span>2
+                <span class="label label-warning">Requires Mirror Refresh</span>
                 <div class="well well-sm">
                     <form action="moduleSelect.php" method="post">
                         <?php
@@ -419,34 +433,34 @@
                 <div class="page-header">
                     <h2>Update Times</h2>
                 </div>
-                <span class="label label-danger">Requires Mirror Reboot to Take Effect</span>
+                    <span class="label label-danger">Requires Mirror Reboot to Take Effect</span>
                 <div class="well well-sm">
-                    <!-- Dropdown button for changing arduino update time -->
-                    <div class="btn-group">
-                        <button class="btn btn-default dropdown-toggle btn-block" data-toggle="dropdown">Indoor Temperature <span class="caret"></span></button>
-                        <ul class="dropdown-menu" role="menu">
-                            <li><a href="?func=itemp&time=30" >30 seconds</a></li>
-                            <li><a href="?func=itemp&time=60" >1 minute</a></li>
-                            <li><a href="?func=itemp&time=120">2 minutes</a></li>
-                            <li><a href="?func=itemp&time=180">3 minutes</a></li>
-                            <li><a href="?func=itemp&time=240">4 minutes</a></li>
-                            <li><a href="?func=itemp&time=300">5 minutes</a></li>
-                        </ul>
-                    </div>
+                <!-- Dropdown button for changing arduino update time -->
+                <div class="btn-group">
+                    <button class="btn btn-default dropdown-toggle btn-block" data-toggle="dropdown">Indoor Temperature <span class="caret"></span></button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="?func=itemp&time=30" >30 seconds</a></li>
+                        <li><a href="?func=itemp&time=60" >1 minute</a></li>
+                        <li><a href="?func=itemp&time=120">2 minutes</a></li>
+                        <li><a href="?func=itemp&time=180">3 minutes</a></li>
+                        <li><a href="?func=itemp&time=240">4 minutes</a></li>
+                        <li><a href="?func=itemp&time=300">5 minutes</a></li>
+                    </ul>
+                </div>
 
-                    <!-- Dropdown button for changing compliment updates -->
-                    <div class="btn-group">
-                        <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">Change Compliments <span class="caret"></span></button>
-                        <ul class="dropdown-menu" role="menu">
-                            <li><a href="?func=ccomp&time=60" >1 minute</a></li>
-                            <li><a href="?func=ccomp&time=120">2 minutes</a></li>
-                            <li><a href="?func=ccomp&time=180">3 minutes</a></li>
-                            <li><a href="?func=ccomp&time=240">4 minutes</a></li>
-                            <li><a href="?func=ccomp&time=300">5 minutes</a></li>
-                            <li><a href="?func=ccomp&time=600">10 minutes</a></li>
-                            <li><a href="?func=ccomp&time=900">15 minutes</a></li>
-                        </ul>
-                    </div>
+                <!-- Dropdown button for changing compliment updates -->
+                <div class="btn-group">
+                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">Change Compliments <span class="caret"></span></button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="?func=ccomp&time=60" >1 minute</a></li>
+                        <li><a href="?func=ccomp&time=120">2 minutes</a></li>
+                        <li><a href="?func=ccomp&time=180">3 minutes</a></li>
+                        <li><a href="?func=ccomp&time=240">4 minutes</a></li>
+                        <li><a href="?func=ccomp&time=300">5 minutes</a></li>
+                        <li><a href="?func=ccomp&time=600">10 minutes</a></li>
+                        <li><a href="?func=ccomp&time=900">15 minutes</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
