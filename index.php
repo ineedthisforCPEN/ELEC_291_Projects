@@ -206,6 +206,54 @@
                     fclose($hfile);                                                     // Close humidity file
                 ?>
 
+
+	<!-- Section for time (By James) -->
+                <div class="page-header">
+                    <h2>Time</h2>
+                </div>
+                <div class="well well-sm">
+	      
+                   
+		<p align="center" style="padding-center: 5%; font-size: 350%;"><script>var x = new Date();
+		    var time = 'AM';
+		    var chara = '0';
+		    var hours = x.getHours();
+		    var minutes = x.getMinutes().toString();
+		    var array1 = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+		    var array2 = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+		    if(x.getHours() > 12)
+		    {
+			    time = 'PM';
+			    hours -= 12;
+
+		    }
+		    if(x.getMinutes() < 10)
+		    {
+			minutes = chara.concat(minutes);
+		    }
+				document.write(hours + ":" + minutes + " " + time);</script></p>
+                           
+                       
+                   
+                    <div class="panel-group">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">
+                                    <a data-toggle="collapse" href="#extratimeinfo">Click For Extra Information</a>
+                                </h4>
+                            </div>
+                            <div id="extratimeinfo" class="panel-collapse collapse">
+                  
+				<div class="panel-body">Date:<span style="float: right;"><script>
+				
+			
+				document.write(array2[x.getDay()] + "," + " " + array1[x.getMonth()] + " " + x.getDate() + "," + " " +  x.getFullYear())</script></span></div>
+                                <div class="panel-body">Time Counter:<span style="float: right;"><script></script></span></div> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Section for weather -->
                 <div class="page-header">
                     <h2>Weather</h2>
