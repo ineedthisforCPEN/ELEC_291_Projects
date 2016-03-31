@@ -33,11 +33,7 @@
             Read info from ip.txt
             This reads the website address
             -->
-             <?php
-                $ipv4file = fopen("/var/www/wwwdata/ip.txt", "r") or die("xxx.xxx.xxx.xxx");
-                $currentipv4 = fgets($ipv4file);
-                fclose($ipv4file);
-            ?> 
+             <?php $currentipv4=$_SERVER['SERVER_ADDR']; ?> 
 
             <h1>Smart Mirror Settings</h1>
             <p> Welcome to the smart mirror settings page. Here, you can see what data the smart mirror has received. You may also turn on or off mirror modules (e.g., you may turn off the TODO list if you wish).
