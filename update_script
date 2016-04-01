@@ -1,0 +1,37 @@
+#!/bin/bash
+# This script updates the conky modules on the smart mirror
+# The minimum time allowable is one update every 30 seconds
+
+# Variables to update times
+arduino_time=0
+compliment_time=0
+
+# Begin infinite loop to perform checks
+while true
+do
+    # Update times gotten from file
+    # Checks are done every loop in case these files are updated by the website
+    arduino_update_time=$(cat /var/www/wwwdata/update_times/arduino_update.txt)
+    compliment_update_time=$(cat /var/www/wwwdata/update_times/compliment_update.txt)
+
+    # Check to see if arduino values should be updated
+    if [ $arduino_time -ge $arduino_update_time ]
+    then
+        sudo python /home/pi/arduino_read.py
+        arduino_time=0
+    fi
+
+    # Check to see if compliment should be updated
+    if [ $compliment_time -ge $compliment_update_time ]
+    then
+        sudo python /home/pi/random_compliment.py
+        compliment_time=0
+    fi
+
+    # Sleep for 30 seconds (minimum allowable update time is 30 seconds)
+    sleep 30
+
+    # Increment times for arduino and compliment
+    arduino_time=$((arduino_time + 30))
+    compliment_time=$((compliment_time + 30))
+done
