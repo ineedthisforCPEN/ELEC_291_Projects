@@ -1,21 +1,15 @@
 /* Include the DHT library */
 #include "DHT.h"
-#define ECHO          11  // Arduino pin to which the ultrasonic sensor's echo pin is connected
-#define TRIGGER       12  // Arduino pin to which the ultrasonic sensor's trigger pin is connected
+#define ECHO          3  // Arduino pin to which the ultrasonic sensor's echo pin is connected
+#define TRIGGER       4  // Arduino pin to which the ultrasonic sensor's trigger pin is connected
 
 /* Variables for pins */
 const int humidityPin = 7;
 const int temperaturePin = A0;
 // Set the RGB LED pins
-const int rPin = 9; 
+const int rPin = 8; 
 const int bPin = 12; 
 const int gPin = 11; 
-
-
-const int buttonPin = 8;     //  pushbutton pin number
-
-int buttonState = 0;         // record the push button status
-
 
 
 /* Initialize the DHT */
@@ -34,10 +28,6 @@ void setup() {
   digitalWrite(rPin, HIGH);
   digitalWrite(bPin, HIGH);
   digitalWrite(gPin, HIGH);
-
-
-  //push button input
-  pinMode(buttonPin, INPUT);
 }
 
 void loop() {  
@@ -57,21 +47,6 @@ void loop() {
      flashGreen();  // Flash green on the RGB LED
     else
      flashRed();  // Flash red on the RGB LED
-
-
-
-     
-      // detect if the button is pressed:
-  buttonState = digitalRead(buttonPin);
-
-  // if the button is pressed, turn on voice command
-  if (buttonState == HIGH) {
-    Serial.print ("ON");
-  } 
-  else {
-    Serial.print("OFF");
-  }
-     
   }
 }
 
