@@ -33,7 +33,11 @@
             Read info from ip.txt
             This reads the website address
             -->
-             <?php $currentipv4=$_SERVER['SERVER_ADDR']; ?> 
+             <?php
+                $ipv4file = fopen("/var/www/wwwdata/ip.txt", "r") or die("xxx.xxx.xxx.xxx");
+                $currentipv4 = fgets($ipv4file);
+                fclose($ipv4file);
+            ?> 
 
             <h1>Smart Mirror Settings</h1>
             <p> Welcome to the smart mirror settings page. Here, you can see what data the smart mirror has received. You may also turn on or off mirror modules (e.g., you may turn off the TODO list if you wish).
@@ -208,29 +212,28 @@
                     <h2>Time</h2>
                 </div>
                 <div class="well well-sm">
-	      
-                   
-		<p align="center" style="padding-center: 5%; font-size: 350%;"><script>var x = new Date();
-		    var time = 'AM';
-		    var chara = '0';
-		    var hours = x.getHours();
-		    var minutes = x.getMinutes().toString();
-		    var array1 = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-		    var array2 = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-		    if(x.getHours() > 12)
-		    {
-			    time = 'PM';
-			    hours -= 12;
-
-		    }
-		    if(x.getMinutes() < 10)
-		    {
-			minutes = chara.concat(minutes);
-		    }
-				document.write(hours + ":" + minutes + " " + time);</script></p>
-                           
-                       
-                   
+            		<p align="center" style="padding-center: 5%; font-size: 350%;">
+                        <script>
+                            var x = new Date();
+                            var time = 'AM';
+                            var chara = '0';
+                            var hours = x.getHours();
+                            var minutes = x.getMinutes().toString();
+                            var array1 = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                            var array2 = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                            
+                            if(x.getHours() > 12) {
+                                time = 'PM';
+                                hours -= 12;
+                            }
+            		    
+                            if(x.getMinutes() < 10) {
+                                minutes = chara.concat(minutes);
+                            }
+            				
+                            document.write(hours + ":" + minutes + " " + time);
+                        </script>
+                    </p>
                     <div class="panel-group">
                         <div class="panel panel-default">
                             <div class="panel-heading">
@@ -239,12 +242,15 @@
                                 </h4>
                             </div>
                             <div id="extratimeinfo" class="panel-collapse collapse">
-                  
-				<div class="panel-body">Date:<span style="float: right;"><script>
-				
-			
-				document.write(array2[x.getDay()] + "," + " " + array1[x.getMonth()] + " " + x.getDate() + "," + " " +  x.getFullYear())</script></span></div>
-                                <div class="panel-body">Time Counter:<span style="float: right;"><script></script></span></div> 
+				                <div class="panel-body">Date:<span style="float: right;">
+                                    <script>
+                                        document.write(array2[x.getDay()] + "," + " " + array1[x.getMonth()] + " " + x.getDate() + "," + " " +  x.getFullYear());
+                                    </script>
+                                    </span>
+                                </div>
+                                <div class="panel-body">Time Counter:<span style="float: right;">
+                                    <script></script></span>
+                                </div> 
                             </div>
                         </div>
                     </div>
