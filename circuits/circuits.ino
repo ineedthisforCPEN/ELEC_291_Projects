@@ -7,9 +7,15 @@
 const int humidityPin = 7;
 const int temperaturePin = A0;
 // Set the RGB LED pins
-const int rPin = 8; 
-const int bPin = 12; 
-const int gPin = 11; 
+const int rPin = 9;
+const int bPin = 12;
+const int gPin = 11;
+
+
+const int buttonPin = 8;     //  pushbutton pin number
+
+int buttonState = 0;         // record the push button status
+
 
 
 /* Initialize the DHT */
@@ -17,7 +23,7 @@ DHT dht(humidityPin, DHT11);
 
 void setup() {
   Serial.begin(9600);
-  
+
   pinMode(humidityPin, INPUT);
   pinMode(temperaturePin, INPUT);
   pinMode(ECHO, INPUT);
@@ -28,38 +34,53 @@ void setup() {
   digitalWrite(rPin, HIGH);
   digitalWrite(bPin, HIGH);
   digitalWrite(gPin, HIGH);
+
+
+  //push button input
+  pinMode(buttonPin, INPUT);
 }
 
-void loop() {  
+void loop() {
   // Measure humidity, temperature and distance levels
   // Print each value on a separate to be read through Python script on Raspberry Pi
   float humidity = dht.readHumidity();
   float temperature = avgUnits(temperaturePin, 500) * (5.0 / 1024.0) * 100.0;    // Temperature in degrees celcius
   float distance = distanceFromSensor();
-    Serial.println(humidity);
-    Serial.println(temperature);
-    Serial.println(distance);
+  Serial.println(humidity);
+  Serial.println(temperature);
+  Serial.println(distance);
 
-    // Take input from the Serial Monitor (Used to let the Raspberry Pi control the output of the RGB LED)
-    if (Serial.available())  {
+  // detect if the button is pressed:
+  buttonState = digitalRead(buttonPin);
+
+  // if the button is pressed, turn on voice command
+  if (buttonState == HIGH) {
+    Serial.println (HIGH);
+  }
+  else {
+    Serial.println(LOW);
+  }
+  // Take input from the Serial Monitor (Used to let the Raspberry Pi control the output of the RGB LED)
+  if (Serial.available())  {
     int a = Serial.read() - '0'; // Converts from ASCII character 1-9 to decimal 1-9
-    if( a == 1)
-     flashGreen();  // Flash green on the RGB LED
+    if ( a == 1)
+      flashGreen();  // Flash green on the RGB LED
     else
-     flashRed();  // Flash red on the RGB LED
+      flashRed();  // Flash red on the RGB LED
+
   }
 }
 
 /*
- * This function performs analogRead on a pin and returns the average units measured.
- * One unit (u) is:
- *      u = Vc / 1024
- * 
- * Parameter: pin - the pin on which to perform the read
- * Parameter: wait - the period of measurement in milliseconds
- * 
- * Returns: the average size of units measured
- */
+   This function performs analogRead on a pin and returns the average units measured.
+   One unit (u) is:
+        u = Vc / 1024
+
+   Parameter: pin - the pin on which to perform the read
+   Parameter: wait - the period of measurement in milliseconds
+
+   Returns: the average size of units measured
+*/
 float avgUnits(int pin, int wait) {
   long startTime = millis();                              // Get current uptime of Arduino board
   long totalMilliVolts = 0;                               // Long for storing total millivolts (long to prevent overflow)
@@ -70,7 +91,7 @@ float avgUnits(int pin, int wait) {
     numMeasures++;                                        // Increment measure counter
   }
 
-  return ((float) totalMilliVolts)/((float) numMeasures); // Return average millivolt measurement
+  return ((float) totalMilliVolts) / ((float) numMeasures); // Return average millivolt measurement
 }
 
 float distanceFromSensor(void) {
@@ -96,31 +117,31 @@ float distanceFromSensor(void) {
 }
 
 /*
- * This function flashes the RGB LED red 
- */
-void flashRed(){
-  for(int a = 0; a < 5; a++){
+   This function flashes the RGB LED red
+*/
+void flashRed() {
+  for (int a = 0; a < 5; a++) {
     digitalWrite(rPin, LOW); // Turn on the red LED
     digitalWrite(bPin, HIGH);
-    digitalWrite(gPin, HIGH);   
-   /* digitalWrite(rPin, HIGH);
-    digitalWrite(bPin, HIGH);
-    digitalWrite(gPin, HIGH);   
-    delay(500);}*/
+    digitalWrite(gPin, HIGH);
+    /* digitalWrite(rPin, HIGH);
+      digitalWrite(bPin, HIGH);
+      digitalWrite(gPin, HIGH);
+      delay(500);}*/
   }
- }
+}
 /*
- * This function flashes the RGB LED green 
- */
-void flashGreen(){
-  for(int b= 0; b < 5; b++){
+   This function flashes the RGB LED green
+*/
+void flashGreen() {
+  for (int b = 0; b < 5; b++) {
     digitalWrite(gPin, LOW); // Turn on the green LED
     digitalWrite(bPin, HIGH);
-    digitalWrite(rPin, HIGH);   
-    /*delay(2000);
     digitalWrite(rPin, HIGH);
-    digitalWrite(bPin, HIGH);
-    digitalWrite(gPin, HIGH);   
-    delay(500);}*/
+    /*delay(2000);
+      digitalWrite(rPin, HIGH);
+      digitalWrite(bPin, HIGH);
+      digitalWrite(gPin, HIGH);
+      delay(500);}*/
   }
 }
