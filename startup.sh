@@ -40,3 +40,16 @@ echo -e "$(tput bold)========================================$(tput sgr0)"
 
 sudo /home/pi/update_script &   # Update script - updates arduino values and compliment
 sudo /home/pi/frsrbtcheck &     # Checks if the website wants the mirror to reboot or refresh
+
+
+#--------------------------------------------------
+# WRITE FILE TO ENSURE ALL MODULES ARE IN THE
+# MODULE_SELECT FILE
+#--------------------------------------------------
+
+if [ ! -f "/var/www/wwwdata/module_select.txt" ]
+then
+    touch /var/www/wwwdata/module_select.txt"
+fi
+
+echo -e "time\nitmep\\nweather\ntodo\ncompliments" > /var/www/wwwdata/module_select.txt
