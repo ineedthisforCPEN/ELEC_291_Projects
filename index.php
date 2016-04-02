@@ -607,7 +607,75 @@
                     </div>
                 </div>
             </div>
-        </div>
+	</div>
+
+		<!-- ==================================================================================================== -->
+                <!-- Translink -->
+                <!-- ==================================================================================================== -->
+                <div class="page-header">
+                    <!-- Display header to let users know what data lies below -->
+                    <h2>Bus Info</h2>
+                </div>
+                <div class="well well-sm">
+                    <!-- Script for getting transit data from the openweathermap API -->
+                    <?php
+                        // Request data from the Translink API - limit is 10 000 requests per day
+                        //$request = 'http://api.translink.ca/rttiapi/v1/stops/59270/estimates?apikey=1Y8IBRRxW0yYIhxyWswH';
+                        //$response  = file_get_contents($request);
+                        //$jsonobj  = json_decode($response, true);
+
+                        // This code is useful for testing - it will not lock our website out of the openweathermap API
+                        $jsonobj = json_decode('[{"RouteNo":"099","RouteName":"COMMERCIAL-BROADWAY\/UBC (B-LINE)  ","Direction":"EAST","RouteMap":{"Href":"http:\/\/nb.translink.ca\/geodata\/099.kmz"},"Schedules":[{"Pattern":"EB1","Destination":"COMM'L-BDWAY STN","ExpectedLeaveTime":"6:42pm 2016-04-01","ExpectedCountdown":-2,"ScheduleStatus":" ","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"06:38:04 pm"},{"Pattern":"EB1","Destination":"COMM'L-BDWAY STN","ExpectedLeaveTime":"6:47pm 2016-04-01","ExpectedCountdown":3,"ScheduleStatus":" ","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"06:39:17 pm"},{"Pattern":"EB1","Destination":"COMM'L-BDWAY STN","ExpectedLeaveTime":"6:56pm 2016-04-01","ExpectedCountdown":12,"ScheduleStatus":"-","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"06:43:47 pm"},{"Pattern":"EB1","Destination":"COMM'L-BDWAY STN","ExpectedLeaveTime":"7:00pm 2016-04-01","ExpectedCountdown":16,"ScheduleStatus":"-","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"06:37:20 pm"},{"Pattern":"EB3","Destination":"TO BOUNDARY B-LINE","ExpectedLeaveTime":"7:03pm 2016-04-01","ExpectedCountdown":19,"ScheduleStatus":"-","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"06:43:07 pm"},{"Pattern":"EB3","Destination":"TO BOUNDARY B-LINE","ExpectedLeaveTime":"7:07pm 2016-04-01","ExpectedCountdown":23,"ScheduleStatus":"*","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"06:07:02 pm"}]}]', true);
+                        
+                        // Get city name from the JSON object
+                        $route = $jsonobj[0]['RouteNo'];
+
+                        // Get route name
+                        $routeName = $jsonobj[0]['RouteName'];
+			
+			// Get bus destination
+			$destination = $jsonobj[0][['Schedules'][0]['Destination'];
+
+                        // Obtain the estimated departure times for the next 6 buses
+                        $bus0 = $jsonobj[0][['Schedules'][0]['ExpectedCountdown'];
+			$bus1 = $jsonobj[0][['Schedules'][1]['ExpectedCountdown'];
+			$bus2 = $jsonobj[0][['Schedules'][2]['ExpectedCountdown'];
+			$bus3 = $jsonobj[0][['Schedules'][3]['ExpectedCountdown'];
+			$bus4 = $jsonobj[0][['Schedules'][4]['ExpectedCountdown'];
+			$bus5 = $jsonobj[0][['Schedules'][5]['ExpectedCountdown'];
+                    ?>
+                    <div class="row">
+                        <!-- Dispay temperature (current, max, min) and conditions -->
+                        <div class="col-md-4">
+                            <p style="padding-left: 5%; font-size: 120%; color: #888888;"><small>Bus stop: UBC Loop Bay 6</small></p>
+                            <p style="padding-left: 5%; font-size: 120%; position: relative; bottom: 15px; color: #888888;"><small><?php echo "Route: " . $routeNname;  ?></small></p>
+                        </div>
+                        <div class="col-md-8">
+			    <p align="right" style="padding-right: 5%; font-size: 200%;"><?php echo $route; ?></p>
+			   <p align="right" style="padding-right: 5%; font-size: 200%;">First Bus Arrival Time:</p>
+                            <p align="right" style="padding-right: 5%; font-size: 350%;"><?php echo $bus1; ?></p>
+                        </div>
+                    </div>
+                    <p style="padding-left: 5%; font-size: 180%;"><?php echo $owmCity; ?><small style="color: #888888;"><?php echo "\tCountry"; ?></small></p>
+                    <p class="under-left" style="font-size: 120%"><small><?php echo $owmLatitude . ", " . $owmLongitude; ?></small></p>
+                    <!-- Display additional information in a drop-down menu (i.e. not visible unless menu is expanded) -->
+                    <div class="panel-group">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">
+                                    <a data-toggle="collapse" href="#extratranslinkinfo">Click For More Departure Times</a>
+                                </h4>
+                            </div>
+                            <div id="extratranslinkinfo" class="panel-collapse collapse">
+                                <div class="panel-body">Second bus leave time:<span style="float: right;"><?php echo $bus1 . " "; ?>min</span></div>
+                                <div class="panel-body">Third bus leave time:<span style="float: right;"><?php echo $bus2 . " "; ?>min</span></div>
+                                <div class="panel-body">Fourth bus leave time:<span style="float: right;"><?php echo $bus3 . " "; ?>min</span></div>
+                                <div class="panel-body">Fifth bus leave time:<span style="float: right;"><?php echo $bus4 . " "; ?>min</span></div>
+                                <div class="panel-body">Sixth bus leave time:<span style="float: right;"><?php echo $bus5 . " "; ?>min</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
     
         <!-- ==================================================================================================== -->
         <!-- BUTTONS FOR REFRESHING PAGE, REFRESHING MIRROR, REBOOTING MIRROR -->
