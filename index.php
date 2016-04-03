@@ -617,10 +617,10 @@
                 </div>
                 <div class="well well-sm">
                     <!-- Script for getting transit data from the openweathermap API -->
-                    <?php
-                        //Request data from the Translink API - limit is 10 000 requests per day
+                    <?php header('content-type: application/json; charset=utf-8');
+			    //Request data from the Translink API - limit is 10 000 requests per day
 			  $request = 'http://api.translink.ca/rttiapi/v1/stops/59270/estimates?apikey=1Y8IBRRxW0yYIhxyWswH';
-			 $response->headers->set('Content-Type', 'application/json');
+			 
                         $response  = file_get_contents($request);
                         $jsonobj  = json_decode($response, true);
 
