@@ -617,11 +617,13 @@
                 </div>
                 <div class="well well-sm">
                     <!-- Script for getting transit data from the openweathermap API -->
-                    <?php header('content-type: application/json; charset=utf-8');
+			<?php 
+			    $headers = array('Content-Type: application/json',);
 			    //Request data from the Translink API - limit is 10 000 requests per day
 			  $request = 'http://api.translink.ca/rttiapi/v1/stops/59270/estimates?apikey=1Y8IBRRxW0yYIhxyWswH';
 			 
-                        $response  = file_get_contents($request);
+			    $response  = file_get_contents($request);
+
                         $jsonobj  = json_decode($response, true);
 
                         // This code is useful for testing - Translink API
@@ -647,23 +649,23 @@
                     <div class="row">
                         <!-- Dispay temperature (current, max, min) and conditions -->
                         <div class="col-md-4">
-                            <p style="padding-left: 5%; font-size: 120%; color: #888888;"><small>Bus stop: UBC Loop Bay 6</small></p>
+                           
                             <p style="padding-left: 5%; font-size: 120%; position: relative; bottom: 15px; color: #888888;"><small><?php echo "Route: " . $routeName;  ?></small></p>
                         </div>
-                        <div class="col-md-8">
+			<div class="col-md-8">
+			    <p align="right" style="padding-right: 5%; font-size: 120%; color: #888888;"><small>UBC Loop Bay 6</small></p>
                             <p align="right" style="padding-right: 5%; font-size: 200%;"><?php echo $route; ?></p>
-                            <p align="right" style="padding-right: 5%; font-size: 200%;">First Bus Arrival Time:</p>
-                            <p align="right" style="padding-right: 5%; font-size: 350%;"><?php echo $bus1; ?></p>
+                            <p align="right" style="padding-right: 5%; font-size: 100%;">First Bus Arrival Time:</p>
+                            <p align="right" style="padding-right: 5%; font-size: 300%;"><?php echo $bus1; ?></p>
                         </div>
                     </div>
-                    <p style="padding-left: 5%; font-size: 180%;"><?php echo $owmCity; ?><small style="color: #888888;"><?php echo "\tCountry"; ?></small></p>
-                    <p class="under-left" style="font-size: 120%"><small><?php echo $owmLatitude . ", " . $owmLongitude; ?></small></p>
+                  
                     <!-- Display additional information in a drop-down menu (i.e. not visible unless menu is expanded) -->
                     <div class="panel-group">
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <h4 class="panel-title">
-                                    <a data-toggle="collapse" href="#extratranslinkinfo">Click For More Departure Times</a>
+                                    <a data-toggle="collapse" href="#extratranslinkinfo">More Departure Times</a>
                                 </h4>
                             </div>
                             <div id="extratranslinkinfo" class="panel-collapse collapse">
