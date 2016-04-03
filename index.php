@@ -617,48 +617,41 @@
                 </div>
                 <div class="well well-sm">
                     <!-- Script for getting transit data from the openweathermap API -->
-			<?php 
-			    //Request data from the Translink API - limit is 10 000 requests per day
-			  $request = 'http://api.translink.ca/rttiapi/v1/stops/59270/estimates?apikey=1Y8IBRRxW0yYIhxyWswH';
-			    $params = array('http' => array('method' => 'GET','header' => 'Content-Type: application/JSON'));
-
-   
-    $context = stream_context_create($params);
-    $response = file_get_contents($request, false, $context);
-    echo "Response: " . $response;
-//$jsonobj  = json_decode($response, true);
-
-            
-
+        			<?php 
+        			    // Request data from the Translink API - limit is 10 000 requests per day
+                        $request = 'http://api.translink.ca/rttiapi/v1/stops/59270/estimates?apikey=1Y8IBRRxW0yYIhxyWswH';
+                        $params = array('http' => array('method' => 'GET','header' => 'Content-Type: application/JSON'));
+                        $context = stream_context_create($params);
+                        $response = file_get_contents($request, false, $context);
+                        $jsonobj  = json_decode($response, true);
 
                         // This code is useful for testing - Translink API
-                        $jsonobj = json_decode('[{"RouteNo":"099","RouteName":"COMMERCIAL-BROADWAY\/UBC (B-LINE)  ","Direction":"WEST","RouteMap":{"Href":"http:\/\/nb.translink.ca\/geodata\/099.kmz"},"Schedules":[{"Pattern":"WB1","Destination":"UBC B-LINE","ExpectedLeaveTime":"8:54pm 2016-04-02","ExpectedCountdown":7,"ScheduleStatus":"*","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"07:52:03 pm"},{"Pattern":"WB1","Destination":"UBC B-LINE","ExpectedLeaveTime":"9:04pm 2016-04-02","ExpectedCountdown":17,"ScheduleStatus":"*","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"08:02:06 pm"},{"Pattern":"WB1","Destination":"UBC B-LINE","ExpectedLeaveTime":"9:14pm 2016-04-02","ExpectedCountdown":27,"ScheduleStatus":" ","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"08:12:02 pm"},{"Pattern":"WB1","Destination":"UBC B-LINE","ExpectedLeaveTime":"9:27pm 2016-04-02","ExpectedCountdown":40,"ScheduleStatus":"-","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"08:22:08 pm"},{"Pattern":"WB1","Destination":"UBC B-LINE","ExpectedLeaveTime":"9:34pm 2016-04-02","ExpectedCountdown":47,"ScheduleStatus":" ","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"08:32:03 pm"},{"Pattern":"WB1","Destination":"UBC B-LINE","ExpectedLeaveTime":"9:44pm 2016-04-02","ExpectedCountdown":57,"ScheduleStatus":" ","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"08:42:08 pm"}]}]', true);
-                                    
+                        //$jsonobj = json_decode('[{"RouteNo":"099","RouteName":"COMMERCIAL-BROADWAY\/UBC (B-LINE)  ","Direction":"WEST","RouteMap":{"Href":"http:\/\/nb.translink.ca\/geodata\/099.kmz"},"Schedules":[{"Pattern":"WB1","Destination":"UBC B-LINE","ExpectedLeaveTime":"8:54pm 2016-04-02","ExpectedCountdown":7,"ScheduleStatus":"*","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"07:52:03 pm"},{"Pattern":"WB1","Destination":"UBC B-LINE","ExpectedLeaveTime":"9:04pm 2016-04-02","ExpectedCountdown":17,"ScheduleStatus":"*","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"08:02:06 pm"},{"Pattern":"WB1","Destination":"UBC B-LINE","ExpectedLeaveTime":"9:14pm 2016-04-02","ExpectedCountdown":27,"ScheduleStatus":" ","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"08:12:02 pm"},{"Pattern":"WB1","Destination":"UBC B-LINE","ExpectedLeaveTime":"9:27pm 2016-04-02","ExpectedCountdown":40,"ScheduleStatus":"-","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"08:22:08 pm"},{"Pattern":"WB1","Destination":"UBC B-LINE","ExpectedLeaveTime":"9:34pm 2016-04-02","ExpectedCountdown":47,"ScheduleStatus":" ","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"08:32:03 pm"},{"Pattern":"WB1","Destination":"UBC B-LINE","ExpectedLeaveTime":"9:44pm 2016-04-02","ExpectedCountdown":57,"ScheduleStatus":" ","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"08:42:08 pm"}]}]', true);
+                                            
                         // Get city name from the JSON object
-                        $route = $jsonobj['RouteNo'];
+                        $route = $jsonobj[0]['RouteNo'];
 
                         // Get route name
-                        $routeName = $jsonobj['RouteName'];
-                        
+                        $routeName = $jsonobj[0]['RouteName'];
+                                
                         // Get bus destination
-                        $destination = $jsonobj['Schedules'][0]['Destination'];
+                        $destination = $jsonobj[0]['Schedules'][0]['Destination'];
 
                         // Obtain the estimated departure times for the next 6 buses
-                        $bus0 = $jsonobj['Schedules'][0]['ExpectedCountdown'];
-                        $bus1 = $jsonobj['Schedules'][1]['ExpectedCountdown'];
-                        $bus2 = $jsonobj['Schedules'][2]['ExpectedCountdown'];
-                        $bus3 = $jsonobj['Schedules'][3]['ExpectedCountdown'];
-                        $bus4 = $jsonobj['Schedules'][4]['ExpectedCountdown'];
-                        $bus5 = $jsonobj['Schedules'][5]['ExpectedCountdown'];
+                        $bus0 = $jsonobj[0]['Schedules'][0]['ExpectedCountdown'];
+                        $bus1 = $jsonobj[0]['Schedules'][1]['ExpectedCountdown'];
+                        $bus2 = $jsonobj[0]['Schedules'][2]['ExpectedCountdown'];
+                        $bus3 = $jsonobj[0]['Schedules'][3]['ExpectedCountdown'];
+                        $bus4 = $jsonobj[0]['Schedules'][4]['ExpectedCountdown'];
+                        $bus5 = $jsonobj[0]['Schedules'][5]['ExpectedCountdown'];
                     ?>
                     <div class="row">
                         <!-- Dispay temperature (current, max, min) and conditions -->
-                        <div class="col-md-4">
-                           
+                        <div class="col-md-4">   
                             <p style="padding-left: 5%; font-size: 120%; position: relative; bottom: 15px; color: #888888;"><small><?php echo "Route: " . $routeName;  ?></small></p>
                         </div>
-			<div class="col-md-8">
-			    <p align="right" style="padding-right: 5%; font-size: 120%; color: #888888;"><small>UBC Loop Bay 6</small></p>
+                        <div class="col-md-8">
+                            <p align="right" style="padding-right: 5%; font-size: 120%; color: #888888;"><small>UBC Loop Bay 6</small></p>
                             <p align="right" style="padding-right: 5%; font-size: 200%;"><?php echo $route; ?></p>
                             <p align="right" style="padding-right: 5%; font-size: 100%;">First Bus Arrival Time:</p>
                             <p align="right" style="padding-right: 5%; font-size: 300%;"><?php echo $bus1; ?></p>
