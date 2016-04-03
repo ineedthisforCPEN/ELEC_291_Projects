@@ -618,31 +618,21 @@
                 <div class="well well-sm">
                     <!-- Script for getting transit data from the openweathermap API -->
 			<?php 
-			    //$headers = array('Content-Type: application/json');
 			    //Request data from the Translink API - limit is 10 000 requests per day
 			  $request = 'http://api.translink.ca/rttiapi/v1/stops/59270/estimates?apikey=1Y8IBRRxW0yYIhxyWswH';
-			 
-			    //$response  = file_get_contents($request);
-			//echo $response;
-			    //$jsonobj  = json_decode($response, true);
+			    $params = array('http' => array('method' => 'GET','header' => 'Content-Type: application/JSON'));
 
-			    $params = array('http' => array(
-        'method' => 'POST',
-        'header' => 'Content-Type: application/html',
-        'content' => $body
-    ));
-
-   if(version_compare(PHP_VERSION, '5.3.0') == -1){ 
-        ini_set('user_agent', 'PHP-SOAP/' . PHP_VERSION . "\r\n" . $params['http']['header']); 
-    } 
-
+   
     $context = stream_context_create($params);
     $response = file_get_contents($request, false, $context);
-$jsonobj  = json_decode($response, true);
+    echo "Response: " . $response;
+//$jsonobj  = json_decode($response, true);
+
+            
 
 
                         // This code is useful for testing - Translink API
-                        //$jsonobj = json_decode('{"RouteNo":"099","RouteName":"COMMERCIAL-BROADWAY\/UBC (B-LINE)  ","Direction":"EAST","RouteMap":{"Href":"http:\/\/nb.translink.ca\/geodata\/099.kmz"},"Schedules":[{"Pattern":"EB1","Destination":"COMM\'L-BDWAY STN","ExpectedLeaveTime":"6.42pm 2016-04-01","ExpectedCountdown":-2,"ScheduleStatus":" ","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"06:38:04 pm"},{"Pattern":"EB1","Destination":"COMM\'L-BDWAY STN","ExpectedLeaveTime":"6:47pm 2016-04-01","ExpectedCountdown":3,"ScheduleStatus":" ","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"06:39:17 pm"},{"Pattern":"EB1","Destination":"COMM\'L-BDWAY STN","ExpectedLeaveTime":"6.56pm 2016-04-01","ExpectedCountdown":12,"ScheduleStatus":"-","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"06.43.47 pm"},{"Pattern":"EB1","Destination":"COMM\'L-BDWAY STN","ExpectedLeaveTime":"7:00pm 2016-04-01","ExpectedCountdown":16,"ScheduleStatus":"-","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"06:37:20 pm"},{"Pattern":"EB3","Destination":"TO BOUNDARY B-LINE","ExpectedLeaveTime":"7:03pm 2016-04-01","ExpectedCountdown":19,"ScheduleStatus":"-","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"06:43:07 pm"},{"Pattern":"EB3","Destination":"TO BOUNDARY B-LINE","ExpectedLeaveTime":"7:07pm 2016-04-01","ExpectedCountdown":23,"ScheduleStatus":"*","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"06:07:02 pm"}]}', true);
+                        $jsonobj = json_decode('{"RouteNo":"099","RouteName":"COMMERCIAL-BROADWAY\/UBC (B-LINE)  ","Direction":"EAST","RouteMap":{"Href":"http:\/\/nb.translink.ca\/geodata\/099.kmz"},"Schedules":[{"Pattern":"EB1","Destination":"COMM\'L-BDWAY STN","ExpectedLeaveTime":"6.42pm 2016-04-01","ExpectedCountdown":-2,"ScheduleStatus":" ","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"06:38:04 pm"},{"Pattern":"EB1","Destination":"COMM\'L-BDWAY STN","ExpectedLeaveTime":"6:47pm 2016-04-01","ExpectedCountdown":3,"ScheduleStatus":" ","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"06:39:17 pm"},{"Pattern":"EB1","Destination":"COMM\'L-BDWAY STN","ExpectedLeaveTime":"6.56pm 2016-04-01","ExpectedCountdown":12,"ScheduleStatus":"-","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"06.43.47 pm"},{"Pattern":"EB1","Destination":"COMM\'L-BDWAY STN","ExpectedLeaveTime":"7:00pm 2016-04-01","ExpectedCountdown":16,"ScheduleStatus":"-","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"06:37:20 pm"},{"Pattern":"EB3","Destination":"TO BOUNDARY B-LINE","ExpectedLeaveTime":"7:03pm 2016-04-01","ExpectedCountdown":19,"ScheduleStatus":"-","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"06:43:07 pm"},{"Pattern":"EB3","Destination":"TO BOUNDARY B-LINE","ExpectedLeaveTime":"7:07pm 2016-04-01","ExpectedCountdown":23,"ScheduleStatus":"*","CancelledTrip":false,"CancelledStop":false,"AddedTrip":false,"AddedStop":false,"LastUpdate":"06:07:02 pm"}]}', true);
                                     
                         // Get city name from the JSON object
                         $route = $jsonobj['RouteNo'];
