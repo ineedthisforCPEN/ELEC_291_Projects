@@ -632,7 +632,9 @@
         'content' => $body
     ));
 
-   
+   if(version_compare(PHP_VERSION, '5.3.0') == -1){ 
+        ini_set('user_agent', 'PHP-SOAP/' . PHP_VERSION . "\r\n" . $params['http']['header']); 
+    } 
 
     $context = stream_context_create($params);
     $response = file_get_contents($request, false, $context);
