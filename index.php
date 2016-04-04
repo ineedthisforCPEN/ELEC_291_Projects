@@ -268,7 +268,7 @@
                             var hours = x.getHours();
                             var minutes = x.getMinutes().toString();
                             var array1 = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-                            var array2 = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                            var array2 = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                             
                             if(x.getHours() > 12) {
                                 time = 'PM';
