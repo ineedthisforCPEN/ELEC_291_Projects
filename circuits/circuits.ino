@@ -21,6 +21,7 @@ const int gPin = 11;
 
 
 const int buttonPin = 8;     //  pushbutton pin number
+const int button2Pin = 5;
 
 int buttonState = 0;         // record the push button status
 int position = HORIZONTAL;
@@ -40,6 +41,7 @@ void setup() {
   pinMode(temperaturePin, INPUT);
   pinMode(ECHO, INPUT);
   pinMode(TRIGGER, OUTPUT);
+  pinMode(button2Pin, INPUT);
   pinMode(rPin, OUTPUT);
   pinMode(bPin, OUTPUT);
   pinMode(gPin, OUTPUT);
@@ -53,7 +55,6 @@ void setup() {
   if (! mma.begin()) {
     while (1);
   }
-
   mma.setRange(MMA8451_RANGE_2_G);
 }
 
@@ -146,6 +147,7 @@ void loop() {
         flashRed();
       }
     }
+  Serial.print(digitalRead(button2Pin));
   Serial.print("\n");
 
 }
@@ -205,10 +207,6 @@ void flashRed() {
     digitalWrite(gPin, HIGH);
     delay(3000);
     digitalWrite(rPin, HIGH);
-    /* digitalWrite(rPin, HIGH);
-      digitalWrite(bPin, HIGH);
-      digitalWrite(gPin, HIGH);
-      delay(500);}*/
    
 }
 /*
@@ -220,10 +218,6 @@ void flashGreen() {
     digitalWrite(rPin, HIGH);
     delay(3000);
     digitalWrite(gPin, HIGH);
-    /*
-      digitalWrite(rPin, HIGH);
-      digitalWrite(bPin, HIGH);
-      digitalWrite(gPin, HIGH);
-      delay(500);}*/
+
   
 }
