@@ -654,7 +654,7 @@
                             <p align="right" style="padding-right: 5%; font-size: 120%; color: #888888;"><small>UBC Loop Bay 6</small></p>
                             <p align="right" style="padding-right: 5%; font-size: 200%;"><?php echo $route; ?></p>
                             <p align="right" style="padding-right: 5%; font-size: 100%;">First Bus Arrival Time:</p>
-                            <p align="right" style="padding-right: 5%; font-size: 300%;"><?php echo $bus1; ?></p>
+                            <p align="right" style="padding-right: 5%; font-size: 300%;"><?php echo $bus0; ?></p>
                         </div>
                     </div>
                   
