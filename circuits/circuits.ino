@@ -1,7 +1,15 @@
 /* Include the DHT library */
 #include "DHT.h"
-#define ECHO          3  // Arduino pin to which the ultrasonic sensor's echo pin is connected
-#define TRIGGER       4  // Arduino pin to which the ultrasonic sensor's trigger pin is connected
+#include <Wire.h>
+#include <Adafruit_MMA8451.h>
+#include <Adafruit_Sensor.h>
+#include <math.h>
+
+#define ECHO          6  // Arduino pin to which the ultrasonic sensor's echo pin is connected
+#define TRIGGER       10  // Arduino pin to which the ultrasonic sensor's trigger pin is connected
+
+#define HORIZONTAL 3
+#define VERTICAL 4
 
 /* Variables for pins */
 const int humidityPin = 7;
@@ -15,11 +23,15 @@ const int gPin = 11;
 const int buttonPin = 8;     //  pushbutton pin number
 
 int buttonState = 0;         // record the push button status
+int position = HORIZONTAL;
+float distance = 0;
 
 
 
 /* Initialize the DHT */
 DHT dht(humidityPin, DHT11);
+
+Adafruit_MMA8451 mma = Adafruit_MMA8451();
 
 void setup() {
   Serial.begin(9600);
@@ -38,37 +50,105 @@ void setup() {
 
   //push button input
   pinMode(buttonPin, INPUT);
+  if (! mma.begin()) {
+    while (1);
+  }
+
+  mma.setRange(MMA8451_RANGE_2_G);
 }
 
 void loop() {
   // Measure humidity, temperature and distance levels
   // Print each value on a separate to be read through Python script on Raspberry Pi
   float humidity = dht.readHumidity();
+  while(isnan(humidity)){
+    humidity = dht.readHumidity();
+  }
   float temperature = avgUnits(temperaturePin, 500) * (5.0 / 1024.0) * 100.0;    // Temperature in degrees celcius
-  float distance = distanceFromSensor();
-  Serial.println(humidity);
-  Serial.println(temperature);
-  Serial.println(distance);
+  distance = distanceFromSensor();
+  while (distance == 1000) {
+    distance = distanceFromSensor();
+  }
+  
 
   // detect if the button is pressed:
   buttonState = digitalRead(buttonPin);
 
   // if the button is pressed, turn on voice command
-  if (buttonState == HIGH) {
-    Serial.println (HIGH);
-  }
-  else {
-    Serial.println(LOW);
+
+  mma.read();
+
+  /* Get a new sensor event */
+  sensors_event_t event;
+  mma.getEvent(&event);
+
+  /* Display the results (acceleration is measured in m/s^2) */
+
+  /* Get the orientation of the sensor */
+  uint8_t o = mma.getOrientation();
+
+  switch (o) {
+    case MMA8451_PL_PUF:
+      position = HORIZONTAL;
+      break;
+    case MMA8451_PL_PUB:
+      position = HORIZONTAL;
+      break;
+    case MMA8451_PL_PDF:
+      break;
+    case MMA8451_PL_PDB:
+      break;
+    case MMA8451_PL_LRF:
+      break;
+    case MMA8451_PL_LRB:
+      break;
+    case MMA8451_PL_LLF:
+      position = VERTICAL;
+      break;
+    case MMA8451_PL_LLB:
+      position = VERTICAL;
+      break;
   }
   // Take input from the Serial Monitor (Used to let the Raspberry Pi control the output of the RGB LED)
-  if (Serial.available())  {
-    int a = Serial.read() - '0'; // Converts from ASCII character 1-9 to decimal 1-9
-    if ( a == 1)
-      flashGreen();  // Flash green on the RGB LED
-    else
-      flashRed();  // Flash red on the RGB LED
+  if (Serial.available() > 0)  {
+    byte firstByte = Serial.read() - '0' ;
+    byte secondByte = Serial.read() - '0';
+    byte sensorByte = firstByte;
+    if (secondByte < 100) {
+      sensorByte = firstByte * 10 + secondByte;
+    }
 
-  }
+    if (sensorByte & 0x01) {
+      Serial.print(temperature);
+      Serial.print("|");
+    }
+    if ((sensorByte >> 1) & 0x01) {
+      Serial.print(humidity);
+      Serial.print("|");
+    }
+    if ((sensorByte >> 2) & 0x01) {
+      Serial.print(distance);
+      Serial.print("|");
+    }
+    if ((sensorByte >> 3 ) & 0x01) {
+      Serial.print(position);
+      Serial.print("|");
+    }
+    if ((sensorByte >> 4) & 0x01) {
+      Serial.print(buttonState);
+      Serial.print("|");
+    }
+    if ((sensorByte >> 5) & 0x01) {
+      if ((sensorByte >> 6) & 0x01) {
+        flashGreen();
+      }
+      else {
+        flashRed();
+      }
+    }
+  Serial.print("\n");
+
+}
 }
 
 /*
@@ -120,28 +200,30 @@ float distanceFromSensor(void) {
    This function flashes the RGB LED red
 */
 void flashRed() {
-  for (int a = 0; a < 5; a++) {
     digitalWrite(rPin, LOW); // Turn on the red LED
     digitalWrite(bPin, HIGH);
     digitalWrite(gPin, HIGH);
+    delay(3000);
+    digitalWrite(rPin, HIGH);
     /* digitalWrite(rPin, HIGH);
       digitalWrite(bPin, HIGH);
       digitalWrite(gPin, HIGH);
       delay(500);}*/
-  }
+   
 }
 /*
    This function flashes the RGB LED green
 */
 void flashGreen() {
-  for (int b = 0; b < 5; b++) {
     digitalWrite(gPin, LOW); // Turn on the green LED
     digitalWrite(bPin, HIGH);
     digitalWrite(rPin, HIGH);
-    /*delay(2000);
+    delay(3000);
+    digitalWrite(gPin, HIGH);
+    /*
       digitalWrite(rPin, HIGH);
       digitalWrite(bPin, HIGH);
       digitalWrite(gPin, HIGH);
       delay(500);}*/
-  }
+  
 }
