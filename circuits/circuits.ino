@@ -10,7 +10,7 @@
 
 #define HORIZONTAL 3
 #define VERTICAL 4
-#define THRESHOLD 20
+#define THRESHOLD 100
 
 /* Variables for pins */
 const int humidityPin = 7;
@@ -129,7 +129,6 @@ void loop() {
       Serial.print("|");
     }
     if ((sensorByte >> 2) & 0x01) {
-      Serial.println(distance);
       if(distance < THRESHOLD)
         Serial.print("1");
       else
