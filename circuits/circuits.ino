@@ -10,6 +10,7 @@
 
 #define HORIZONTAL 3
 #define VERTICAL 4
+#define THRESHOLD 20
 
 /* Variables for pins */
 const int humidityPin = 7;
@@ -62,7 +63,7 @@ void loop() {
   // Measure humidity, temperature and distance levels
   // Print each value on a separate to be read through Python script on Raspberry Pi
   float humidity = dht.readHumidity();
-  while(isnan(humidity)){
+  while (isnan(humidity)) {
     humidity = dht.readHumidity();
   }
   float temperature = avgUnits(temperaturePin, 500) * (5.0 / 1024.0) * 100.0;    // Temperature in degrees celcius
@@ -70,6 +71,7 @@ void loop() {
   while (distance == 1000) {
     distance = distanceFromSensor();
   }
+
 
   // detect if the button is pressed:
   buttonState = digitalRead(buttonPin);
@@ -127,7 +129,11 @@ void loop() {
       Serial.print("|");
     }
     if ((sensorByte >> 2) & 0x01) {
-      Serial.print(wakeScreen(distance));
+      Serial.println(distance);
+      if(distance < THRESHOLD)
+        Serial.print("1");
+      else
+        Serial.print("0");
       Serial.print("|");
     }
     if ((sensorByte >> 3 ) & 0x01) {
@@ -146,10 +152,10 @@ void loop() {
         flashRed();
       }
     }
-  Serial.print(digitalRead(button2Pin));
-  Serial.print("\n");
+    Serial.print(digitalRead(button2Pin));
+    Serial.print("\n");
 
-}
+  }
 }
 
 /*
@@ -201,32 +207,22 @@ float distanceFromSensor(void) {
    This function flashes the RGB LED red
 */
 void flashRed() {
-    digitalWrite(rPin, LOW); // Turn on the red LED
-    digitalWrite(bPin, HIGH);
-    digitalWrite(gPin, HIGH);
-    delay(3000);
-    digitalWrite(rPin, HIGH);
-   
+  digitalWrite(rPin, LOW); // Turn on the red LED
+  digitalWrite(bPin, HIGH);
+  digitalWrite(gPin, HIGH);
+  delay(3000);
+  digitalWrite(rPin, HIGH);
+
 }
 /*
    This function flashes the RGB LED green
 */
 void flashGreen() {
-    digitalWrite(gPin, LOW); // Turn on the green LED
-    digitalWrite(bPin, HIGH);
-    digitalWrite(rPin, HIGH);
-    delay(3000);
-    digitalWrite(gPin, HIGH);
+  digitalWrite(gPin, LOW); // Turn on the green LED
+  digitalWrite(bPin, HIGH);
+  digitalWrite(rPin, HIGH);
+  delay(3000);
+  digitalWrite(gPin, HIGH);
 
-  
+
 }
-
-int wakeScreen(float distance) {
-   if(distance > 45.0){
-    return 1;
-   }
-   else {
-    return 0;
-   }
-}
-
