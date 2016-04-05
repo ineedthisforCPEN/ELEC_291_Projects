@@ -70,7 +70,6 @@ void loop() {
   while (distance == 1000) {
     distance = distanceFromSensor();
   }
-  
 
   // detect if the button is pressed:
   buttonState = digitalRead(buttonPin);
@@ -128,7 +127,7 @@ void loop() {
       Serial.print("|");
     }
     if ((sensorByte >> 2) & 0x01) {
-      Serial.print(distance);
+      Serial.print(wakeScreen(distance));
       Serial.print("|");
     }
     if ((sensorByte >> 3 ) & 0x01) {
@@ -221,3 +220,13 @@ void flashGreen() {
 
   
 }
+
+int wakeScreen(float distance) {
+   if(distance > 45.0){
+    return 1;
+   }
+   else {
+    return 0;
+   }
+}
+

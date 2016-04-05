@@ -90,14 +90,20 @@ if int(argv[1]) & 2 and len(output_list) > 0:
     h_file.write(output_list.pop(0))
     h_file.close()
 
-if int(argv[1]) & 4 and len(output_list) > 0:
-    try:
-        u_file = open('/var/www/wwwdata/ultrasonicsensor.txt', 'w')
-    except:
-        exit('ERROR: Could not open ultrasonicsensor file - make sure you have the appropriate permission')
 
-    u_file.write(output_list.pop(0))
-    u_file.close()
+#if int(argv[1]) & 4 and len(output_list) > 0:
+    #try:
+        #u_file = open('/var/www/wwwdata/ultrasonicsensor.txt', 'w')
+    #except:
+        #exit('ERROR: Could not open ultrasonicsensor file - make sure you have the appropriate permission')
+
+    #u_file.write(output_list.pop(0))
+    #u_file.close()
+
+#check to see if the user is at the distance threshold from the mirror
+if len(output_list) > 0:
+	screen_wake = int(output_list.pop()[:-1])
+	if screen_wake: os.system('')
 
 if int(argv[1]) & 8 and len(output_list) > 0:
     try:
