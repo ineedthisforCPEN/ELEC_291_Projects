@@ -1,0 +1,6 @@
+/home/pi/.config/blather/data/DNA.wav
+/home/pi/.config/blather/data/spiders.wav
+/home/pi/.config/blather/data/lee.wav
+/home/pi/.config/blather/data/cell.wav
+/home/pi/.config/blather/data/elephants.wav
+/home/pi/.config/blather/data/steph.wav

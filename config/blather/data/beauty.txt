@@ -1,0 +1,6 @@
+/home/pi/.config/blather/data/dazzling.wav
+/home/pi/.config/blather/data/charming.wav
+/home/pi/.config/blather/data/amazing.wav
+/home/pi/.config/blather/data/beautiful.wav
+/home/pi/.config/blather/data/lovely.wav
+/home/pi/.config/blather/data/wonderful.wav

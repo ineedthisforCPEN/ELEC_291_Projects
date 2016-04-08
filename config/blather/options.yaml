@@ -1,0 +1,8 @@
+#This is a YAML file
+#these options can be over-ridden by commandline arguments
+continuous: true
+history: null
+microphone:1 
+interface: null
+valid_sentence_command: echo "Command received."
+invalid_sentence_command: echo "Invalid command. Try again."
