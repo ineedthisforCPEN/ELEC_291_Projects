@@ -1,0 +1,55 @@
+#====================================
+#   Conky Settings
+#====================================
+background yes
+update_interval 1
+double_buffer yes
+no_buffers yes
+imlib_cache_size 10
+
+draw_shades yes
+draw_outline no
+draw_borders no
+draw_graph_borders no
+default_graph_size 26 80
+show_graph_scale no
+show_graph_range no
+default_shade_color black
+
+#====================================
+#   Window Specifications
+#====================================
+
+alignment top_left
+gap_x 20
+gap_y 60
+minimum_size 5 5
+maximum_width 1200
+own_window yes
+own_window_type normal # other options are: override/dock/desktop/panel
+own_window_transparent yes
+own_window_hints undecorate,sticky,skip_taskbar,skip_pager,below
+border_inner_margin 0
+border_outer_margin 0
+#alignment middle_middle
+#own_window_argb_visual yes
+#own_window_argb_value 0
+
+
+#====================================
+#   Text Settings
+#====================================
+use_xft yes
+xftalpha 0
+xftfont Droid Sans:size=10
+text_buffer_size 256
+override_utf8_locale yes
+
+###################################################
+###################################################
+
+
+TEXT
+${font DejaVuSans:style=Condensed-Bold:pixelsize=40}${color white} Indoor Conditions|${offset 5} ${font DejaVuSans:style=Condensed-Bold:pixelsize=20}${color white}Humidity: ${execi 1 cat /var/www/wwwdata/humidity.txt}%
+${font DejaVuSans:style=Condensed-Bold:pixelsize=20}${color white} ${alignr 5}${voffset 10}Temperature: ${execi 1 cat /var/www/wwwdata/temperature.txt}°C
+

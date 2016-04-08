@@ -1,0 +1,53 @@
+#====================================
+#   Conky Settings
+#====================================
+background yes
+update_interval 1
+double_buffer yes
+no_buffers yes
+imlib_cache_size 10
+
+draw_shades no
+draw_outline no
+draw_borders no
+draw_graph_borders no
+default_graph_size 26 80
+show_graph_scale no
+show_graph_range no
+
+
+#====================================
+#   Window Specifications
+#====================================
+alignment top_middle
+gap_x 0
+gap_y 30
+minimum_size 5 5
+maximum_width 1200
+own_window yes
+own_window_type desktop  # other options are: override/dock/desktop/panel
+own_window_transparent yes
+own_window_hints undecorate,sticky,skip_taskbar,skip_pager,below
+border_inner_margin 0
+border_outer_margin 0
+#alignment middle_middle
+#own_window_argb_visual yes
+#own_window_argb_value 0
+
+
+#====================================
+#   Text Settings
+#====================================
+use_xft yes
+xftalpha 0
+xftfont Droid Sans:size=10
+text_buffer_size 256
+override_utf8_locale yes
+
+###################################################
+###################################################
+
+TEXT
+${font Droid Sans:pixelsize=40}${color white} Indoor Conditions|${offset 30} ${font Droid Sans:pixelsize=20}${color white} Humidity: % #${execi 300 cat ~/humidity.txt}
+${font Droid Sans:pixelsize=20}${color white} ${alignr 0} Temperature: ° #${execi 300 cat ~/temperature.txt}
+
