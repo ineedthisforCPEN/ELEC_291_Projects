@@ -2,6 +2,7 @@
 # This script updates the conky modules on the smart mirror
 # The minimum time allowable is one update every 30 seconds
 
+<<<<<<< HEAD
 # Constants
 t_read=1        # Read temperature
 h_read=2        # Read humidity

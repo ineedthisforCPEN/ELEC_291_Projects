@@ -52,4 +52,4 @@ then
     touch /var/www/wwwdata/module_select.txt"
 fi
 
-echo -e "time\nitmep\\nweather\ntodo\ncompliments" > /var/www/wwwdata/module_select.txt
+echo -e "time\nitmep\nweather\ntodo\ncompliments" > /var/www/wwwdata/module_select.txt
