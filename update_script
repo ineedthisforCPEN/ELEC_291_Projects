@@ -1,0 +1,49 @@
+#!/bin/bash
+# This script updates the conky modules on the smart mirror
+# The minimum time allowable is one update every 30 seconds
+
+# Constants
+t_read=1        # Read temperature
+h_read=2        # Read humidity
+u_read=4        # Read ultrasonic sensor
+a_read=8        # Read accelerometer
+b_read=16       # Read button (for rotation)
+l_read=32       # Turn LED on
+g_read=64       # Set LED to green
+
+# Variables to update times
+temp_humid_time=0
+compliment_time=0
+#vcflag=0
+
+sleep_time=2
+
+sleep 8
+/home/pi/bin/blather_start &
+
+# Begin infinite loop to perform checks
+while true
+do
+    # Update times gotten from file
+    # Checks are done every loop in case these files are updated by the website
+    temp_humid_update_time=$(cat /var/www/wwwdata/update_times/arduino_update.txt)
+    compliment_update_time=$(cat /var/www/wwwdata/update_times/compliment_update.txt)
+#    usrange=$(cat /var/www/wwwdata/ultrasonicsensor.txt)
+
+    data_to_read=$((u_read | a_read | b_read))
+
+    [ $temp_humid_time -ge $temp_humid_update_time ] && data_to_read=$((data_to_read | t_read | h_read)) && temp_humid_time=0
+#    [ -f "/var/www/wwwdata/Red" ] && sudo rm /var/www/wwwdata/Red && data_to_read=$((data_to_read | l_read))
+#    [ -f "/var/www/wwwdata/Green" ] && sudo rm /var/www/wwwdata/Green && data_to_read=$((data_to_read | l_read | g_read))
+
+    sudo python /home/pi/arduino_read.py $data_to_read
+    [ $compliment_time -ge $compliment_update_time ] && sudo python /home/pi/random_compliment.py && compliment_time=0
+
+#    [ "$vcflag" == 0 ] && [ "$usrange" == 1 ] && /home/pi/bin/blather_start &
+#    [ "$vcflag" == 1 ] && [ "$usrange" == 0 ] && sudo pkill -f "/home/pi/bin/blather_start"
+
+    temp_humid_time=$((temp_humid_time + 4 + sleep_time))
+    compliment_time=$((compliment_time + 4 + sleep_time))
+
+    sleep $sleep_time
+done

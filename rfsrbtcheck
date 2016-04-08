@@ -1,0 +1,63 @@
+#!/bin/bash
+
+while true
+do
+    # If rfsflag exists, remove it, then refresh the mirror
+    if [ -f /var/www/wwwdata/rfsflag ] 
+    then
+        sudo rm -f /var/www/wwwdata/rfsflag
+
+        # Check to see which modules the user wants to display
+        # Variable is empty if the user does not want to display that module
+        file="/var/www/wwwdata/module_select.txt"
+        t_module=$(grep time $file)             # Time module
+        i_module=$(grep itemp $file)            # Internal conditions module
+        w_module=$(grep weather $file)          # Weather module
+        d_module=$(grep todo $file)             # Todo module
+        c_module=$(grep compliment $file)       # Compliment module
+
+        # Check to see which modules are currently running
+        # Variable is empty if the module's process is not running
+        t_isrunning=$(ps -aux | grep '/home/pi/.sm/timeanddate' | grep -v 'grep')   # Time module's process
+        i_isrunning=$(ps -aux | grep '/home/pi/.sm/arduino'     | grep -v 'grep')   # Internal conditions module's process
+        w_isrunning=$(ps -aux | grep '/home/pi/.sm/weather'     | grep -v 'grep')   # Weather module's process
+        d_isrunning=$(ps -aux | grep '/home/pi/.sm/todo'        | grep -v 'grep')   # Todo module's process
+        c_isrunning=$(ps -aux | grep '/home/pi/.sm/compliment'  | grep -v 'grep')   # Compliment module's process
+
+        # If user does not want to display a module and its process is running, stop time process
+        [ -z "$t_module" ] && [ ! -z "$t_isrunning" ] && sudo /home/pi/bin/timeanddate_end
+        [ -z "$i_module" ] && [ ! -z "$i_isrunning" ] && sudo /home/pi/bin/arduino_end
+        [ -z "$w_module" ] && [ ! -z "$w_isrunning" ] && sudo /home/pi/bin/weather_end
+        [ -z "$d_module" ] && [ ! -z "$d_isrunning" ] && sudo /home/pi/bin/todo_end
+        [ -z "$c_module" ] && [ ! -z "$c_isrunning" ] && sudo /home/pi/bin/compliment_end
+
+
+        # If user wants to display a module and its process is not running, start the module
+        [ ! -z "$t_module" ] && [ -z "$t_isrunning" ] && /home/pi/bin/timeanddate_start &
+        [ ! -z "$i_module" ] && [ -z "$i_isrunning" ] && /home/pi/bin/arduino_start &
+        [ ! -z "$w_module" ] && [ -z "$w_isrunning" ] && /home/pi/bin/weather_start &
+        [ ! -z "$d_module" ] && [ -z "$d_isrunning" ] && /home/pi/bin/todo_start &
+        [ ! -z "$c_module" ] && [ -z "$c_isrunning" ] && /home/pi/bin/compliment_start &
+    fi
+
+    # If rbtflag exists, remove it, then reboot the mirror
+
+    if [ -f /var/www/wwwdata/rbtflag ]
+    then
+        sudo rm -f /var/www/wwwdata/rbtflag
+        vertical=$(cat /var/www/wwwdata/accelerometer.txt)
+
+        if [ "$vertical" -eq "4" ]
+        then
+            sudo sed -i '61s/.*/display_rotate=3/' /boot/config.txt
+        else
+            sudo sed -i '61s/.*/#display_rotate=3/' /boot/config.txt
+        fi
+
+        sudo reboot
+    fi
+
+    [ -f /var/www/wwwdata/rbtflag ] && sudo rm -f /var/www/wwwdata/rbtflag && sudo reboot
+
+    sleep 4
+done

@@ -1,0 +1,15 @@
+p.under-right {
+	padding-right: 5%;
+	font-size: 180%;
+	position: relative;
+	bottom: 20px;
+	color: #888888;
+}
+
+p.under-left {
+	padding-left: 5%;
+	font-size: 180%;
+	position: relative;
+	bottom: 20px;
+	color: #888888;
+}

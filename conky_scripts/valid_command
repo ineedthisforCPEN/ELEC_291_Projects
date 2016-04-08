@@ -1,0 +1,3 @@
+#!/bin/bash
+#touch /var/www/wwwdata/Green
+python /home/pi/Green.py

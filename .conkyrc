@@ -1,0 +1,27 @@
+update_interval 1
+total_run_times 0
+net_avg_samples 1
+cpu_avg_samples 1
+imlib_cache_size 0
+double_buffer yes
+no_buffers yes
+format_human_readable
+use_xft yes
+xftfont Existence:size=8
+override_utf8_locale yes
+text_buffer_size 2048
+own_window_class Conky
+own_window yes
+own_window_type normal
+own_window_transparent yes
+own_window_hints undecorated,below,sticky,skip_taskbar,skip_pager
+alignment top_right
+gap_x 30
+gap_y 275
+minimum_size 100 20
+draw_shades no
+default_color white
+TEXT
+${voffset 15}
+${offset 350}${font DejaVuSans:style=Condensed-Bold::pixelsize=30}Web Address:
+#${offset 350}${font DejaVuSans:style=Condensed-Bold::pixelsize=30}${execi 30 ip addr | grep "inet 192." | awk '{print $2}' | rev | cut -c 4- | rev}

@@ -1,0 +1,2 @@
+#!/bin/bash
+~/blather/Blather.py -c -m 1 --valid-sentence-command=/home/pi/bin/valid_command --invalid-sentence-command=/home/pi/bin/invalid_command

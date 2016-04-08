@@ -1,0 +1,4 @@
+#!/bin/bash
+conky -c ~/.sm/arduino &
+conky -c ~/.sm/weather &
+conky -c ~/.sm/timeanddate

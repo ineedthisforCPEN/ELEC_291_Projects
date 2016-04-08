@@ -1,0 +1,7 @@
+#!/bin/bash
+conky -q -c ~/.sm/compliment &
+conky -q -c ~/.sm/arduino &
+conky -q -c ~/.sm/weather &
+conky -q -c ~/.sm/timeanddate &
+conky -q -c ~/.sm/todo &
+conky -q -c ~/.sm/ipaddress &

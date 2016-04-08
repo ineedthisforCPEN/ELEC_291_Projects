@@ -1,0 +1,4 @@
+#!/bin/bash
+#touch /var/www/wwwdata/Red &
+python /home/pi/Red.py
+omxplayer /home/pi/.config/blather/data/invalid.wav
